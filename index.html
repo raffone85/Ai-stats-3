@@ -103,6 +103,7 @@ body{background:var(--bg);color:var(--t1);font-family:var(--S);min-height:100vh;
 .side-tag{padding:3px 7px;border-radius:4px;font:700 .7rem var(--M);letter-spacing:.3px}
 .side-c{background:var(--blu-bg);color:var(--blu);border:1px solid rgba(96,165,250,.2)}
 .side-o{background:var(--mag-bg);color:var(--mag);border:1px solid rgba(192,132,252,.2)}
+.gz-badge{padding:3px 8px;border-radius:5px;font:700 .7rem var(--M);background:rgba(96,165,250,.1);color:var(--blu);border:1px solid rgba(96,165,250,.2);white-space:nowrap}
 
 /* AFF DOTS */
 .aff{display:flex;align-items:center;gap:3px}
@@ -211,7 +212,6 @@ select:focus{border-color:var(--grn)}
 <button class="mtab" data-m="ia">Stats IA</button>
 <button class="mtab" data-m="players">Giocatori</button>
 <button class="mtab" data-m="gen">Generale</button>
-<!-- scheda GZ rimossa -->
 </div>
 <div id="main"></div><div id="detM"></div>
 </div>
@@ -303,6 +303,17 @@ if(gz > -200 && gz < 200) return {label:'Ov0.5 95%',desc:'Over 0.5 al 95%',type:
 return {label:'Normale',desc:'Nessuna indicazione forte',type:'neutral'};
 }
 
+/* ===== GZ ALIGNMENT HELPER ===== */
+function getGzAlignment(evento, requiredType){
+if(!ST.gz.length) return null;
+const normEvento = normName(evento);
+const matchGz = ST.gz.find(g => normName(g.evento) === normEvento);
+if(!matchGz) return null;
+const prob = gzProbability(matchGz.gz);
+const aligned = (requiredType === 'over' && prob.type === 'over') || (requiredType === 'under' && prob.type === 'under');
+return { gz: matchGz.gz, prob: prob, aligned: aligned };
+}
+
 /* ===== PLAYER SCORING — CARDS ===== */
 function scoreAmm(r){
 const b=[];
@@ -359,20 +370,32 @@ function diffLabel(d){if(d===0)return['N/D','n'];const v=(d>0?'+':'')+d.toFixed(
 function renderUp(id,lbl,dk){const has=ST[dk].length>0;
 if(has)return`<div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;padding:8px 12px;background:var(--s1);border-radius:8px;border:1px solid var(--brd)"><div class="upload-area" style="flex:1;padding:10px;margin:0;border:1px dashed var(--brd2)"><input type="file" accept=".csv" data-target="${dk}"><p><span class="loaded">${ST[dk].length} eventi</span> — sostituire</p></div><button class="csv-clear" data-clear="${dk}" style="width:32px;height:32px;border-radius:6px;border:1px solid rgba(224,82,82,.3);background:rgba(224,82,82,.08);color:var(--red);font-size:1rem;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center">✕</button></div>`;
 return`<div class="upload-area"><input type="file" accept=".csv" data-target="${dk}"><div class="ico">↑</div><p>${lbl}</p></div>`;}
-function renderM12(data,m1fn,affFn,mk,sortM1,detMk,indType,indKey,expFn,leagueKey){
+function renderM12(data,m1fn,affFn,mk,sortM1,detMk,indType,indKey,expFn,leagueKey,marketDir){
 let h=`<div class="stabs"><button class="stab ${ST.sub==='m1'?'active':''}" data-s="m1">TOP Pick</button><button class="stab ${ST.sub==='m2'?'active':''}" data-s="m2">Classifica</button>${sortToggle()}</div>`;
 h+=`<div class="toolbar">${leagueKey?leagueDropdown(data,leagueKey):''}<input class="search" placeholder="Cerca..." value="${ST.q}" oninput="searchInput(this)"><button class="pdf-btn" onclick="${expFn}()">${svgPDF} PDF</button></div>`;
 const F=l=>filtL(l,leagueKey);
-if(ST.sub==='m1'){const m=applySort(F(data.filter(m1fn)),sortM1);h+=`<div class="sec"><span class="tag tag-m1">TOP Pick</span><span class="sec-ct">${m.length} match</span></div>`;h+=m.length?'<div class="mlist">'+m.map(r=>`<div class="mrow" onclick="openDet('${detMk}',${data.indexOf(r)})"><div class="m-ora">${r.ora}</div><div class="m-name">${r.evento}</div><div class="m-right">${indB(r[indKey],indType)}<span class="m1b">TOP</span></div></div>`).join('')+'</div>':'<div class="empty"><div class="ico">—</div><p>Nessun match</p></div>';}
-else{const all=data.map((r,i)=>({...r,_i:i,...affFn(r)}));const la=applySort(F(all.filter(x=>x.aff>=4)),(a,b)=>b.total-a.total);const lb=applySort(F(all.filter(x=>x.aff===3)),(a,b)=>b.total-a.total);const row=r=>`<div class="mrow" onclick="openDet('${detMk}',${r._i})"><div class="m-ora">${r.ora}</div><div class="m-name">${r.evento}</div><div class="m-right">${indB(r[indKey],indType)}<div class="aff">${dots(r.aff,'sm')}<span class="aff-n aff-${r.aff}">${r.aff}</span></div>${m1fn(data[r._i])?'<span class="m1b">TOP</span>':''}</div></div>`;h+=`<div class="sec"><span class="tag tag-a">Alta Probabilità</span><span class="sec-ct">${la.length}</span></div>`;h+=la.length?'<div class="mlist">'+la.map(row).join('')+'</div>':'<div class="empty"><div class="ico">—</div><p>Nessun match</p></div>';h+=`<div class="sec"><span class="tag tag-b">Seconda Scelta</span><span class="sec-ct">${lb.length}</span></div>`;h+=lb.length?'<div class="mlist">'+lb.map(row).join('')+'</div>':'<div class="empty"><div class="ico">—</div><p>Nessun match</p></div>';}return h;}
+if(ST.sub==='m1'){const m=applySort(F(data.filter(m1fn)),sortM1);h+=`<div class="sec"><span class="tag tag-m1">TOP Pick</span><span class="sec-ct">${m.length} match</span></div>`;h+=m.length?'<div class="mlist">'+m.map(r=>{
+const gzAlign = marketDir ? getGzAlignment(r.evento, marketDir) : null;
+const gzBadge = (gzAlign && gzAlign.aligned) ? `<span class="gz-badge">GZ:${gzAlign.prob.label}</span>` : '';
+return`<div class="mrow" onclick="openDet('${detMk}',${data.indexOf(r)})"><div class="m-ora">${r.ora}</div><div class="m-name">${r.evento}</div><div class="m-right">${indB(r[indKey],indType)}<span class="m1b">TOP</span>${gzBadge}</div></div>`;}).join('')+'</div>':'<div class="empty"><div class="ico">—</div><p>Nessun match</p></div>';}
+else{const all=data.map((r,i)=>({...r,_i:i,...affFn(r)}));const la=applySort(F(all.filter(x=>x.aff>=4)),(a,b)=>b.total-a.total);const lb=applySort(F(all.filter(x=>x.aff===3)),(a,b)=>b.total-a.total);const row=r=>{
+const gzAlign = marketDir ? getGzAlignment(r.evento, marketDir) : null;
+const gzBadge = (gzAlign && gzAlign.aligned) ? `<span class="gz-badge">GZ:${gzAlign.prob.label}</span>` : '';
+return`<div class="mrow" onclick="openDet('${detMk}',${r._i})"><div class="m-ora">${r.ora}</div><div class="m-name">${r.evento}</div><div class="m-right">${indB(r[indKey],indType)}<div class="aff">${dots(r.aff,'sm')}<span class="aff-n aff-${r.aff}">${r.aff}</span></div>${m1fn(data[r._i])?'<span class="m1b">TOP</span>':''}${gzBadge}</div></div>`;};h+=`<div class="sec"><span class="tag tag-a">Alta Probabilità</span><span class="sec-ct">${la.length}</span></div>`;h+=la.length?'<div class="mlist">'+la.map(row).join('')+'</div>':'<div class="empty"><div class="ico">—</div><p>Nessun match</p></div>';h+=`<div class="sec"><span class="tag tag-b">Seconda Scelta</span><span class="sec-ct">${lb.length}</span></div>`;h+=lb.length?'<div class="mlist">'+lb.map(row).join('')+'</div>':'<div class="empty"><div class="ico">—</div><p>Nessun match</p></div>';}return h;}
 
-function renderOv05(){if(!ST.ov05.length)return renderUp('a','Carica CSV Over 0.5 PT','ov05');return renderUp('a','','ov05')+renderM12(ST.ov05,ov05M1,ov05AFF,'ov05',(a,b)=>a.ind-b.ind,'ov05','ov05','ind','expOv05');}
-function renderGGO25(mk){if(!ST.ggov25.length)return renderUp('b','Carica CSV GG / Over 2.5','ggov25');const isGG=mk==='gg';return renderUp('b','','ggov25')+renderM12(ST.ggov25,isGG?ggM1:o25M1,isGG?ggAFF:o25AFF,mk,isGG?(a,b)=>b.pgg-a.pgg:(a,b)=>b.igbt-a.igbt,mk,'igbt','igbt',isGG?'expGG':'expO25','nazione');}
+function renderOv05(){if(!ST.ov05.length)return renderUp('a','Carica CSV Over 0.5 PT','ov05');return renderUp('a','','ov05')+renderM12(ST.ov05,ov05M1,ov05AFF,'ov05',(a,b)=>a.ind-b.ind,'ov05','ov05','ind','expOv05','over');}
+function renderGGO25(mk){if(!ST.ggov25.length)return renderUp('b','Carica CSV GG / Over 2.5','ggov25');const isGG=mk==='gg';return renderUp('b','','ggov25')+renderM12(ST.ggov25,isGG?ggM1:o25M1,isGG?ggAFF:o25AFF,mk,isGG?(a,b)=>b.pgg-a.pgg:(a,b)=>b.igbt-a.igbt,mk,'igbt','igbt',isGG?'expGG':'expO25','nazione','over');}
 function renderU25(){if(!ST.ggov25.length)return renderUp('b','Carica CSV GG / Over 2.5','ggov25');let h=renderUp('b','','ggov25');
 h+=`<div class="stabs"><button class="stab ${ST.sub==='m1'?'active':''}" data-s="m1">TOP Pick</button><button class="stab ${ST.sub==='m2'?'active':''}" data-s="m2">Classifica</button>${sortToggle()}</div>`;
 h+=`<div class="toolbar">${leagueDropdown(ST.ggov25,'nazione')}<input class="search" placeholder="Cerca..." value="${ST.q}" oninput="searchInput(this)"><button class="pdf-btn" onclick="expU25()">${svgPDF} PDF</button></div>`;
-if(ST.sub==='m1'){const m=applySort(filtL(ST.ggov25.filter(u25M1),'nazione'),(a,b)=>b.diff-a.diff);h+=`<div class="sec"><span class="tag tag-m1">TOP Pick</span><span class="sec-ct">${m.length} · DGT>1.5 · MGE<3</span></div>`;h+=m.length?'<div class="mlist">'+m.map(r=>`<div class="mrow" onclick="openDet('u25',${ST.ggov25.indexOf(r)})"><div class="m-ora">${r.ora}</div><div class="m-name">${r.evento}</div><div class="m-right"><div class="m-ind ind-g">+${r.diff.toFixed(1)}</div><span class="m1b">TOP</span></div></div>`).join('')+'</div>':'<div class="empty"><div class="ico">—</div><p>Nessun match</p></div>';}
-else{const all=ST.ggov25.map((r,i)=>({...r,_i:i,...u25AFF(r)}));const la=applySort(filtL(all.filter(x=>x.aff>=4),'nazione'),(a,b)=>b.total-a.total);const lb=applySort(filtL(all.filter(x=>x.aff===3),'nazione'),(a,b)=>b.total-a.total);const row=r=>`<div class="mrow" onclick="openDet('u25',${r._i})"><div class="m-ora">${r.ora}</div><div class="m-name">${r.evento}</div><div class="m-right"><div class="m-ind ${r.diff>=1.5?'ind-g':r.diff>=1?'ind-o':'ind-r'}">${r.diff>0?'+':''}${r.diff.toFixed(1)}</div><div class="aff">${dots(r.aff,'sm')}<span class="aff-n aff-${r.aff}">${r.aff}</span></div>${u25M1(ST.ggov25[r._i])?'<span class="m1b">TOP</span>':''}</div></div>`;h+=`<div class="sec"><span class="tag tag-a">Alta Probabilità</span><span class="sec-ct">${la.length}</span></div>`;h+=la.length?'<div class="mlist">'+la.map(row).join('')+'</div>':'<div class="empty"><div class="ico">—</div><p>Nessun match</p></div>';h+=`<div class="sec"><span class="tag tag-b">Seconda Scelta</span><span class="sec-ct">${lb.length}</span></div>`;h+=lb.length?'<div class="mlist">'+lb.map(row).join('')+'</div>':'<div class="empty"><div class="ico">—</div><p>Nessun match</p></div>';}return h;}
+if(ST.sub==='m1'){const m=applySort(filtL(ST.ggov25.filter(u25M1),'nazione'),(a,b)=>b.diff-a.diff);h+=`<div class="sec"><span class="tag tag-m1">TOP Pick</span><span class="sec-ct">${m.length} · DGT>1.5 · MGE<3</span></div>`;h+=m.length?'<div class="mlist">'+m.map(r=>{
+const gzAlign = getGzAlignment(r.evento, 'under');
+const gzBadge = (gzAlign && gzAlign.aligned) ? `<span class="gz-badge">GZ:${gzAlign.prob.label}</span>` : '';
+return`<div class="mrow" onclick="openDet('u25',${ST.ggov25.indexOf(r)})"><div class="m-ora">${r.ora}</div><div class="m-name">${r.evento}</div><div class="m-right"><div class="m-ind ind-g">+${r.diff.toFixed(1)}</div><span class="m1b">TOP</span>${gzBadge}</div></div>`;}).join('')+'</div>':'<div class="empty"><div class="ico">—</div><p>Nessun match</p></div>';}
+else{const all=ST.ggov25.map((r,i)=>({...r,_i:i,...u25AFF(r)}));const la=applySort(filtL(all.filter(x=>x.aff>=4),'nazione'),(a,b)=>b.total-a.total);const lb=applySort(filtL(all.filter(x=>x.aff===3),'nazione'),(a,b)=>b.total-a.total);const row=r=>{
+const gzAlign = getGzAlignment(r.evento, 'under');
+const gzBadge = (gzAlign && gzAlign.aligned) ? `<span class="gz-badge">GZ:${gzAlign.prob.label}</span>` : '';
+return`<div class="mrow" onclick="openDet('u25',${r._i})"><div class="m-ora">${r.ora}</div><div class="m-name">${r.evento}</div><div class="m-right"><div class="m-ind ${r.diff>=1.5?'ind-g':r.diff>=1?'ind-o':'ind-r'}">${r.diff>0?'+':''}${r.diff.toFixed(1)}</div><div class="aff">${dots(r.aff,'sm')}<span class="aff-n aff-${r.aff}">${r.aff}</span></div>${u25M1(ST.ggov25[r._i])?'<span class="m1b">TOP</span>':''}${gzBadge}</div></div>`;};h+=`<div class="sec"><span class="tag tag-a">Alta Probabilità</span><span class="sec-ct">${la.length}</span></div>`;h+=la.length?'<div class="mlist">'+la.map(row).join('')+'</div>':'<div class="empty"><div class="ico">—</div><p>Nessun match</p></div>';h+=`<div class="sec"><span class="tag tag-b">Seconda Scelta</span><span class="sec-ct">${lb.length}</span></div>`;h+=lb.length?'<div class="mlist">'+lb.map(row).join('')+'</div>':'<div class="empty"><div class="ico">—</div><p>Nessun match</p></div>';}return h;}
 
 function renderMG13(){if(!ST.mg13.length)return renderUp('c','Carica CSV Multigol 1-3','mg13');const side=ST.mgSide;const isC=side==='casa';const m1f=isC?mg13M1C:mg13M1O;const af=isC?mg13AFF_C:mg13AFF_O;const ik=isC?'ich':'ica';
 let h=renderUp('c','','mg13');h+=`<div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap"><div class="stabs"><button class="stab ${ST.sub==='m1'?'active':''}" data-s="m1">TOP Pick</button><button class="stab ${ST.sub==='m2'?'active':''}" data-s="m2">Classifica</button></div><div class="stabs"><button class="stab ${side==='casa'?'active':''}" onclick="ST.mgSide='casa';render()">Casa</button><button class="stab ${side==='ospite'?'active':''}" onclick="ST.mgSide='ospite';render()">Ospite</button>${sortToggle()}</div></div>`;
@@ -632,8 +655,6 @@ if(rest.length){h+=`<div class="sec"><span class="tag tag-b">Da Valutare</span><
 h+='<div class="mlist">'+rest.map(genRow).join('')+'</div>';}
 return h;}
 
-/* ===== RENDER GZ RIMOSSO — nessuna scheda separata ===== */
-
 /* ===== DETAIL ===== */
 function renderDet(){if(ST.det===null)return'';const mk=ST.detMarket;let r,affR,m1,fields,mL;
 if(mk==='gen'){
@@ -865,14 +886,11 @@ if(m.gz && m.signals.some(s=>s.includes('GZ'))){txt+='     GZ: '+m.gz.prob.label
 });txt+='\n';};
 wr('ELITE (Score >= 6)',elite);wr('BUONI (Score 3.5-5.9)',buoni);
 saveTxt('Analisi Incrociata',txt);}
-// funzione expGZ rimossa
 
 /* ===== MAIN RENDER ===== */
 function render(){
 const main=document.getElementById('main');const ld=[];if(ST.ov05.length)ld.push('Ov05:'+ST.ov05.length);if(ST.ggov25.length)ld.push('GG/O25:'+ST.ggov25.length);if(ST.mg13.length)ld.push('MG:'+ST.mg13.length);if(ST.ia.length)ld.push('IA:'+ST.ia.length);if(ST.plCards.length)ld.push('Cart:'+ST.plCards.length);if(ST.plShots.length)ld.push('Tiri:'+ST.plShots.length);if(ST.gz.length)ld.push('GZ:'+ST.gz.length);document.getElementById('hdrInfo').textContent=ld.join(' · ');
-let h='';switch(ST.market){case'ov05':h=renderOv05();break;case'gg':h=renderGGO25('gg');break;case'o25':h=renderGGO25('o25');break;case'u25':h=renderU25();break;case'mg13':h=renderMG13();break;case'ia':h=renderIA();break;case'players':h=renderPlayers();break;case'gen':h=renderGen();break;
-// case 'gz' rimosso
-}
+let h='';switch(ST.market){case'ov05':h=renderOv05();break;case'gg':h=renderGGO25('gg');break;case'o25':h=renderGGO25('o25');break;case'u25':h=renderU25();break;case'mg13':h=renderMG13();break;case'ia':h=renderIA();break;case'players':h=renderPlayers();break;case'gen':h=renderGen();break;}
 main.innerHTML=h;document.getElementById('detM').innerHTML=renderDet();
 const si=main.querySelector('.search');
 if(si&&ST._searchFocused){si.focus();si.setSelectionRange(ST.q.length,ST.q.length);}
