@@ -397,14 +397,14 @@ button{border:none;background:none;cursor:pointer}
   function getO25Rows(){let rows=ST.ggov25.length?ST.ggov25.map(r=>{const a=o25AFF(r);const dm=getDataMiningForMatch(r.evento);const f=getDMFactor(dm,'o25');return{...r,score:a.total*f,aff:Math.min(5,Math.round(a.aff*f)),originalScore:a.total,originalAff:a.aff,breakdown:a.breakdown,m1:o25M1(r),dm}}):ST.dataMining.map(dm=>({ora:dm.ora,evento:dm.match,igbt:0,mge:dm.mge,diff:dm.diff,pgg:0,s12:0,qov25:dm.qOV25,score:0,aff:dm.np>=30?4:2,breakdown:[],m1:false,dm}));if(ST.sub==='m1')rows=rows.filter(r=>r.m1);rows=filtLeague(rows,'lega');return rows.sort((a,b)=>b.score-a.score||sortTime(a,b));}
   function getU25Rows(){let rows=ST.ggov25.length?ST.ggov25.map(r=>{const a=u25AFF(r);const dm=getDataMiningForMatch(r.evento);const f=getDMFactor(dm,'u25');return{...r,score:a.total*f,aff:Math.min(5,Math.round(a.aff*f)),originalScore:a.total,originalAff:a.aff,breakdown:a.breakdown,m1:u25M1(r),dm}}):ST.dataMining.map(dm=>({ora:dm.ora,evento:dm.match,igbt:0,mge:dm.mge,diff:dm.diff,pgg:0,s12:0,qov25:dm.qOV25,score:0,aff:dm.np>=30?4:2,breakdown:[],m1:false,dm}));if(ST.sub==='m1')rows=rows.filter(r=>r.m1);rows=filtLeague(rows,'lega');return rows.sort((a,b)=>b.score-a.score||sortTime(a,b));}
   function getMgRows(){let rows=ST.mg13.length?ST.mg13.map(r=>{const h=mg13AFF_C(r),a=mg13AFF_O(r);const aff=ST.sub==='ospite'?a.aff:h.aff;const dm=getDataMiningForMatch(r.evento);const f=getDMFactor(dm,'mg13');return{...r,score:Math.max(h.total,a.total)*f,aff:Math.min(5,Math.round(aff*f)),originalScore:Math.max(h.total,a.total),originalAff:aff,house:h,away:a,breakdown:ST.sub==='ospite'?a.breakdown:h.breakdown,side:ST.sub==='ospite'?'ospite':'casa',m1c:mg13M1C(r),m1o:mg13M1O(r),dm}}):ST.dataMining.map(dm=>({ora:dm.ora,evento:dm.match,ich:0,ica:0,house:{total:0,aff:2},away:{total:0,aff:2},score:0,aff:dm.np>=30?4:2,side:'casa',m1c:false,m1o:false,dm}));if(ST.sub==='m1')rows=rows.filter(r=>r.m1c||r.m1o);rows=filt(rows);return rows.sort((a,b)=>(ST.sub==='ospite'?b.away.total-a.away.total:b.house.total-a.house.total)||sortTime(a,b));}
-  function getIaRows(){return ST.ia.map(r=>({...r,score:r.avgAff,aff:r.maxAff>=4?5:r.maxAff>=3?4:r.maxAff>=2.5?3:r.maxAff>=1.5?2:1}));}
-  function getPlayerRows(){const isCards=ST.plSub==='cards';return (isCards?ST.plCards:ST.plShots).map(r=>{const a=isCards?scoreAmm(r):scoreGol(r);return{...r,score:a.total,level:a.level,breakdown:a.breakdown,aff:a.total>=7?5:a.total>=5?4:a.total>=3.5?3:a.total>=2?2:1}});}
-  function getQuoteRows(){return ST.quoteValore.map(r=>{const v1=isValueSign(r.r1,r.dm1,r.spread1),vX=isValueSign(r.rx,r.dmx,r.spreadX),v2=isValueSign(r.r2,r.dm2,r.spread2);let side=null;if(v1&&!v2)side='casa';else if(v2&&!v1)side='ospite';else if(v1&&v2)side='entrambe';else if(vX)side='pareggio';return{...r,value1:v1,valueX:vX,value2:v2,golSide:side,score:(v1?r.spread1:0)+(vX?r.spreadX:0)+(v2?r.spread2:0)};});}
+  function getIaRows(){let rows=ST.ia.map(r=>({...r,score:r.avgAff,aff:r.maxAff>=4?5:r.maxAff>=3?4:r.maxAff>=2.5?3:r.maxAff>=1.5?2:1}));if(ST.iaCat!=='all')rows=rows.filter(r=>r.stats.some(s=>s.key===ST.iaCat));rows=filtLeague(rows,'lega');return rows.sort((a,b)=>b.score-a.score||sortTime(a,b));}
+  function getPlayerRows(){const isCards=ST.plSub==='cards';let rows=(isCards?ST.plCards:ST.plShots).map(r=>{const a=isCards?scoreAmm(r):scoreGol(r);return{...r,score:a.total,level:a.level,breakdown:a.breakdown,aff:a.total>=7?5:a.total>=5?4:a.total>=3.5?3:a.total>=2?2:1}});rows=filtLeague(rows,'lega');return rows.sort((a,b)=>b.score-a.score||sortTime(a,b));}
+  function getQuoteRows(){let rows=ST.quoteValore.map(r=>{const v1=isValueSign(r.r1,r.dm1,r.spread1),vX=isValueSign(r.rx,r.dmx,r.spreadX),v2=isValueSign(r.r2,r.dm2,r.spread2);let side=null;if(v1&&!v2)side='casa';else if(v2&&!v1)side='ospite';else if(v1&&v2)side='entrambe';else if(vX)side='pareggio';return{...r,value1:v1,valueX:vX,value2:v2,golSide:side,score:(v1?r.spread1:0)+(vX?r.spreadX:0)+(v2?r.spread2:0)};});if(ST.quoteFilter!=='all')rows=rows.filter(r=>r.golSide===ST.quoteFilter);rows=filt(rows);return ST.sortMode==='time'?rows.sort(sortTime):rows.sort((a,b)=>b.score-a.score||sortTime(a,b));}
   function isValueSign(qr,qdm,spr){return spr>0.15&&qr>1.01&&qr<3&&qdm>0;}
   function gzProbability(gz){if(gz===null)return{label:'N/D',desc:'Dato mancante',type:'nd'};if(gz<-1800)return{label:'U2.5 64%',desc:'Under 2.5 al 64%',type:'under'};if(gz<-1200)return{label:'U3.5 81%',desc:'Under 3.5 al 81%',type:'under'};if(gz>5000)return{label:'Ov2.5 64%',desc:'Over 2.5 al 64%',type:'over'};if(gz>1000)return{label:'Ov1.5 80%',desc:'Over 1.5 al 80%',type:'over'};if(gz>-200&&gz<200)return{label:'Ov0.5 95%',desc:'Over 0.5 al 95%',type:'over'};return{label:'Normale',desc:'Nessuna indicazione forte',type:'neutral'};}
-  function getGzRows(){return ST.gz.map(r=>({...r,prob:gzProbability(r.gz),score:Math.abs(r.gz||0)}));}
-  function getGeneralRows(){return[];}
-  function getDataMiningRows(){return ST.dataMining;}
+  function getGzRows(){let rows=ST.gz.map(r=>({...r,prob:gzProbability(r.gz),score:Math.abs(r.gz||0)}));if(ST.gzFilter!=='all')rows=rows.filter(r=>r.prob.type===ST.gzFilter);rows=filtLeague(rows,'lega');if(ST.gzSort==='time'||ST.sortMode==='time')return rows.sort(sortTime);return rows.sort((a,b)=>Math.abs(b.gz||0)-Math.abs(a.gz||0)||sortTime(a,b));}
+  function getGeneralRows(){const rows=[];getOv05Rows().slice(0,5).forEach(r=>rows.push({ora:r.ora,evento:r.evento,market:'Ov 0.5PT',score:r.score,aff:r.aff,source:r}));getGgRows().slice(0,5).forEach(r=>rows.push({ora:r.ora,evento:r.evento,market:'GG',score:r.score,aff:r.aff,source:r}));getO25Rows().slice(0,5).forEach(r=>rows.push({ora:r.ora,evento:r.evento,market:'Ov 2.5',score:r.score,aff:r.aff,source:r}));getU25Rows().slice(0,5).forEach(r=>rows.push({ora:r.ora,evento:r.evento,market:'U 2.5',score:r.score,aff:r.aff,source:r}));getMgRows().slice(0,5).forEach(r=>rows.push({ora:r.ora,evento:r.evento,market:'MG 1-3',score:Math.max(r.house.total,r.away.total),aff:Math.max(r.house.aff,r.away.aff),source:r}));rows.sort((a,b)=>b.score-a.score||sortTime(a,b));return filt(rows);}
+  function getDataMiningRows(){let rows=ST.dataMining;rows=filt(rows);return ST.sortMode==='time'?rows.sort(sortTime):rows.sort((a,b)=>b.np-a.np||sortTime(a,b));}
 
   // ==================== PRONOSTICI (MATCH HUB POTENZIATO) ====================
   function buildPronostici(){
@@ -458,7 +458,6 @@ button{border:none;background:none;cursor:pointer}
     }
     return rows.sort((a,b)=>b.confidence-a.confidence||sortTime(a,b));
   }
-
   function currentRows(){
     if(ST.market==='pronostici'){let r=buildPronostici(); r=filt(r); if(ST.pronosticiFilter==='top') r=r.filter(x=>x.advice.main?.tier?.includes('TOP')); return r;}
     if(ST.market==='ov05') return getOv05Rows();
@@ -470,23 +469,16 @@ button{border:none;background:none;cursor:pointer}
     if(ST.market==='players') return getPlayerRows();
     if(ST.market==='quote') return getQuoteRows();
     if(ST.market==='gz') return getGzRows();
-    if(ST.market==='datamining') return ST.dataMining;
+    if(ST.market==='gen') return getGeneralRows();
+    if(ST.market==='datamining') return getDataMiningRows();
     if(ST.market==='dashboard') return [];
     if(ST.market==='storico') return ST.history;
     return [];
   }
 
   // ==================== RENDER ====================
-  function renderUploadGrid(){
-    const el=document.getElementById('uploadGrid');
-    el.innerHTML=DATASETS.map((d,i)=>{const n=ST[d.key]?.length||0; return `<div class="upload-card"><input id="f_${d.key}_${i}" type="file" accept=".csv,text/csv" data-target="${d.key}"><div class="upload-lbl">${d.label}</div><div class="upload-meta">${n?`<span class="loaded">${n} righe</span>`:'Nessun file'}<small>${d.hint}</small></div><div class="upload-actions"><button type="button" class="pick-btn" data-pick="f_${d.key}_${i}">Seleziona CSV</button>${n?`<button class="clear-btn" data-clear="${d.key}">Reset</button>`:''}</div></div>`;}).join('');
-  }
-  async function handleUpload(input){
-    const key=input.dataset.target; const file=input.files[0]; if(!key||!file)return;
-    const raw=await file.text(); const map={ov05:parseOv05,ggov25:parseGGOv25,mg13:parseMG13,ia:parseIA,plCards:parsePlCards,plShots:parsePlShots,quoteValore:parseQuoteValore,gz:parseGZ,dataMining:parseDataMining};
-    if(map[key]){ ST[key]=map[key](raw); if(key==='dataMining') computeBacktestStats(); }
-    render();
-  }
+  function renderUploadGrid(){document.getElementById('uploadGrid').innerHTML=DATASETS.map((d,i)=>{const n=ST[d.key]?.length||0; return `<div class="upload-card"><input id="f_${d.key}_${i}" type="file" accept=".csv,text/csv" data-target="${d.key}"><div class="upload-lbl">${d.label}</div><div class="upload-meta">${n?`<span class="loaded">${n} righe</span>`:'Nessun file'}<small>${d.hint}</small></div><div class="upload-actions"><button type="button" class="pick-btn" data-pick="f_${d.key}_${i}">Seleziona CSV</button>${n?`<button class="clear-btn" data-clear="${d.key}">Reset</button>`:''}</div></div>`;}).join('');}
+  async function handleUpload(input){const key=input.dataset.target; const file=input.files[0]; if(!key||!file)return; const raw=await file.text(); const map={ov05:parseOv05,ggov25:parseGGOv25,mg13:parseMG13,ia:parseIA,plCards:parsePlCards,plShots:parsePlShots,quoteValore:parseQuoteValore,gz:parseGZ,dataMining:parseDataMining}; if(map[key]){ ST[key]=map[key](raw); if(key==='dataMining') computeBacktestStats(); } render();}
   function clearDataset(k){ST[k]=[]; render();}
 
   function buildControls(){
@@ -501,16 +493,16 @@ button{border:none;background:none;cursor:pointer}
       <div class="status">🎯 Pronostici: <strong>${rows.length}</strong> partite</div><div id="uploadStatus" class="up-status"></div>`;
     } else if(ST.market==='dashboard'){
       document.getElementById('controls').innerHTML=`<div class="status">📈 Dashboard delle performance</div>`;
-    } else if(ST.market==='storico'){
-      document.getElementById('controls').innerHTML=`<div class="stabs"><button class="stab active">Storico</button></div><div class="toolbar"><input class="search" id="searchIn" placeholder="Cerca..."></div>`;
     } else {
       let base=ST[ST.market==='ov05'?'ov05':ST.market==='gg'||ST.market==='o25'||ST.market==='u25'?'ggov25':ST.market==='mg13'?'mg13':ST.market==='ia'?'ia':ST.market==='players'?ST.plSub==='cards'?ST.plCards:ST.plShots:ST.market==='quote'?ST.quoteValore:ST.market==='gz'?ST.gz:ST.dataMining]||[];
       const leagues=ST.market==='gg'||ST.market==='o25'||ST.market==='u25'||ST.market==='ia'||ST.market==='players'||ST.market==='gz'?getLeagueOptions(base,'lega'):[];
       let stabs='';
       if(['ov05','gg','o25','u25'].includes(ST.market)) stabs=`<div class="stabs"><button class="stab ${ST.sub==='m1'?'active':''}" data-sub="m1">M1</button><button class="stab ${ST.sub==='all'?'active':''}" data-sub="all">Tutti</button><button class="stab ${ST.sortMode==='score'?'active':''}" data-sort="score">Score</button><button class="stab ${ST.sortMode==='time'?'active':''}" data-sort="time">Orario</button></div>`;
       else if(ST.market==='mg13') stabs=`<div class="stabs"><button class="stab ${ST.sub==='casa'?'active':''}" data-sub="casa">Casa</button><button class="stab ${ST.sub==='ospite'?'active':''}" data-sub="ospite">Ospite</button><button class="stab ${ST.sortMode==='score'?'active':''}" data-sort="score">Score</button><button class="stab ${ST.sortMode==='time'?'active':''}" data-sort="time">Orario</button></div>`;
-      else if(ST.market==='ia') stabs=`<div class="stabs"><button class="stab ${ST.iaCat==='all'?'active':''}" data-iacat="all">Tutte</button><button class="stab ${ST.iaCat==='TT'?'active':''}" data-iacat="TT">TT</button><button class="stab ${ST.iaCat==='TIP'?'active':''}" data-iacat="TIP">TiP</button><button class="stab ${ST.sortMode==='score'?'active':''}" data-sort="score">Score</button></div>`;
-      else if(ST.market==='players') stabs=`<div class="stabs"><button class="stab ${ST.plSub==='cards'?'active':''}" data-plsub="cards">Cartellini</button><button class="stab ${ST.plSub==='shots'?'active':''}" data-plsub="shots">Tiri/Gol</button><button class="stab ${ST.sortMode==='score'?'active':''}" data-sort="score">Score</button></div>`;
+      else if(ST.market==='ia'){const cats=[['all','Tutte'],['TT','TT'],['TIP','TiP'],['COR','Corner'],['FAL','Falli'],['FG','FG']]; stabs=`<div class="stabs">${cats.map(([v,l])=>`<button class="stab ${ST.iaCat===v?'active':''}" data-iacat="${v}">${l}</button>`).join('')}<button class="stab ${ST.sortMode==='score'?'active':''}" data-sort="score">Score</button><button class="stab ${ST.sortMode==='time'?'active':''}" data-sort="time">Orario</button></div>`;}
+      else if(ST.market==='players') stabs=`<div class="stabs"><button class="stab ${ST.plSub==='cards'?'active':''}" data-plsub="cards">Cartellini</button><button class="stab ${ST.plSub==='shots'?'active':''}" data-plsub="shots">Tiri/Gol</button><button class="stab ${ST.sortMode==='score'?'active':''}" data-sort="score">Score</button><button class="stab ${ST.sortMode==='time'?'active':''}" data-sort="time">Orario</button></div>`;
+      else if(ST.market==='quote'){const opts=[['all','Tutti'],['casa','Casa'],['ospite','Ospite'],['pareggio','Pareggio'],['entrambe','Entrambe']]; stabs=`<div class="stabs">${opts.map(([v,l])=>`<button class="stab ${ST.quoteFilter===v?'active':''}" data-qfilter="${v}">${l}</button>`).join('')}<button class="stab ${ST.sortMode==='score'?'active':''}" data-sort="score">Spread</button><button class="stab ${ST.sortMode==='time'?'active':''}" data-sort="time">Orario</button></div>`;}
+      else if(ST.market==='gz'){const opts=[['all','Tutti'],['over','Over'],['under','Under'],['neutral','Neutrale']]; stabs=`<div class="stabs">${opts.map(([v,l])=>`<button class="stab ${ST.gzFilter===v?'active':''}" data-gzfilter="${v}">${l}</button>`).join('')}<button class="stab ${ST.gzSort==='value'?'active':''}" data-gzsort="value">Valore</button><button class="stab ${ST.gzSort==='time'?'active':''}" data-gzsort="time">Orario</button></div>`;}
       else stabs=`<div class="stabs"><button class="stab ${ST.sortMode==='score'?'active':''}" data-sort="score">Score</button><button class="stab ${ST.sortMode==='time'?'active':''}" data-sort="time">Orario</button></div>`;
       const leagueDD=leagues.length>1?`<select class="select" id="leagueSel"><option value="all">Tutte</option>${leagues.map(l=>`<option ${ST.league===l?'selected':''}>${l}</option>`).join('')}</select>`:'';
       document.getElementById('controls').innerHTML=`${stabs}<div class="toolbar"><input class="search" id="searchIn" placeholder="Cerca..." value="${escapeHtml(ST.q)}">${leagueDD}<button class="pdf-btn" id="pdfBtn">${svgPDF}<span>PDF</span></button></div><div class="status">Righe: ${rows.length}</div>`;
@@ -562,6 +554,12 @@ button{border:none;background:none;cursor:pointer}
     if(ST.market==='ov05'){ const dmB=dmBadgeHtml(dm,'ov05'), valB=valueBadgeHtml(dm,'ov05'); html=`<div class="mrow" data-open="${i}"><div class="m-ora">${escapeHtml(r.ora)}</div><div><div class="m-name">${escapeHtml(r.evento)}</div><div class="m-sub">${r.m1?'<span class="badge good">M1</span>':''}${dmB}${valB}</div></div><div class="m-right">${affDisp}${r.ind?indB(r.ind,'ov05'):dm?`<div class="m-ind ${dm.ic<=320?'ind-g':'ind-r'}">${dm.ic}</div>`:''}</div></div>`; }
     else if(['gg','o25','u25'].includes(ST.market)){ const dmB=dmBadgeHtml(dm,ST.market), valB=valueBadgeHtml(dm,ST.market); html=`<div class="mrow" data-open="${i}"><div class="m-ora">${escapeHtml(r.ora)}</div><div><div class="m-name">${escapeHtml(r.evento)}</div><div class="m-sub"><span>${escapeHtml(r.lega||'')}</span>${r.m1?'<span class="badge good">M1</span>':''}${dmB}${valB}</div></div><div class="m-right">${affDisp}${indB(r.igbt,'igbt')}</div></div>`; }
     else if(ST.market==='mg13'){ const side=ST.sub==='ospite'?'O':'C'; const ind=ST.sub==='ospite'?r.ica:r.ich; const mg24=dm&&isMG24(dm)?'<span class="badge alt">🔥 MG 2-4</span>':''; html=`<div class="mrow" data-open="${i}"><div class="m-ora">${escapeHtml(r.ora)}</div><div><div class="m-name">${escapeHtml(r.evento)}</div><div class="m-sub"><span class="badge alt">${ST.sub==='ospite'?'Ospite':'Casa'}</span>${r.m1c?'<span class="badge good">M1 C</span>':''}${r.m1o?'<span class="badge info">M1 O</span>':''}${mg24}</div></div><div class="m-right">${affDisp}${ind?indB(ind,'mg'):''}</div></div>`; }
+    else if(ST.market==='ia') html=`<div class="mrow" data-open="${i}"><div class="m-ora">${escapeHtml(r.ora)}</div><div><div class="m-name">${escapeHtml(r.evento)}</div><div class="m-sub"><span>${escapeHtml(r.lega||'')}</span>${r.stats.slice(0,3).map(s=>`<span class="badge ${s.aff>=3?'good':s.aff>=2?'warn':'neu'}">${escapeHtml(s.key)} ${escapeHtml(s.pred)}</span>`).join('')}</div></div><div class="m-right">${affBadge(r.aff)}<div class="m-ind ind-r">${fmt(r.avgAff,1)}</div></div></div>`;
+    else if(ST.market==='players') html=`<div class="mrow" data-open="${i}"><div class="m-ora">${escapeHtml(r.ora)}</div><div><div class="m-name">${escapeHtml(r.nome)}</div><div class="m-sub"><span>${escapeHtml(r.squadra||'')}</span><span>${escapeHtml(r.partita||'')}</span></div></div><div class="m-right">${affBadge(r.aff)}<div class="m-ind ${r.level==='hot'?'ind-g':r.level==='warm'?'ind-o':'ind-r'}">${fmt(r.score,1)}</div></div></div>`;
+    else if(ST.market==='quote') html=`<div class="mrow" data-open="${i}"><div class="m-ora">${escapeHtml(r.ora)}</div><div><div class="m-name">${escapeHtml(r.match)}</div><div class="m-sub">${r.value1?'<span class="badge good">1 value</span>':''}${r.valueX?'<span class="badge warn">X value</span>':''}${r.value2?'<span class="badge info">2 value</span>':''}${r.golSide?`<span class="badge alt">${escapeHtml(r.golSide)}</span>`:''}</div></div><div class="m-right"><div class="m-ind ${r.score>=0.8?'ind-g':r.score>=0.35?'ind-o':'ind-r'}">${fmt(r.score,2)}</div></div></div>`;
+    else if(ST.market==='gz') html=`<div class="mrow" data-open="${i}"><div class="m-ora">${escapeHtml(r.ora)}</div><div><div class="m-name">${escapeHtml(r.evento)}</div><div class="m-sub"><span>${escapeHtml(r.lega||'')}</span><span class="badge ${r.prob.type==='over'?'good':r.prob.type==='under'?'warn':'neu'}">${escapeHtml(r.prob.label)}</span></div></div><div class="m-right"><div class="m-ind ${Math.abs(r.gz||0)>=5000?'ind-g':Math.abs(r.gz||0)>=1200?'ind-o':'ind-r'}">${fmt(r.gz,0)}</div></div></div>`;
+    else if(ST.market==='gen') html=`<div class="mrow" data-open="${i}"><div class="m-ora">${escapeHtml(r.ora)}</div><div><div class="m-name">${escapeHtml(r.evento)}</div><div class="m-sub"><span class="badge alt">${escapeHtml(r.market)}</span></div></div><div class="m-right">${affBadge(r.aff||3)}<div class="m-ind ind-g">${fmt(r.score,1)}</div></div></div>`;
+    else if(ST.market==='datamining'){ const npBadge=r.np>=30?'good':r.np>=15?'warn':'neu'; html=`<div class="mrow" data-open="${i}"><div class="m-ora">${escapeHtml(r.ora)}</div><div><div class="m-name">${escapeHtml(r.match)}</div><div class="m-sub"><span class="badge ${npBadge}">NP: ${r.np}</span><span>1: ${r.p1.toFixed(0)}% (${r.q1.toFixed(2)})</span><span>X: ${r.pX.toFixed(0)}% (${r.qX.toFixed(2)})</span><span>2: ${r.p2.toFixed(0)}% (${r.q2.toFixed(2)})</span><span>OV25: ${r.pOV25.toFixed(0)}% (${r.qOV25.toFixed(2)})</span></div></div><div class="m-right"><div class="m-ind ${r.pOV25>50?'ind-g':r.pOV25>40?'ind-o':'ind-r'}">${r.pOV25.toFixed(0)}%</div></div></div>`; }
     else { html=`<div class="mrow" data-open="${i}"><div class="m-ora">${escapeHtml(r.ora||'')}</div><div><div class="m-name">${escapeHtml(r.evento||r.nome||r.match)}</div></div></div>`; }
     return html+`<div class="pickbar"><button class="pickbtn" data-addpick="${i}">➕ Storico</button></div>`;
   }
@@ -570,7 +568,7 @@ button{border:none;background:none;cursor:pointer}
   function closeDetail(){ ST.det=null; document.getElementById('detM').innerHTML=''; }
   function renderDetail(){
     const r=ST.det; if(!r)return; const m=r.advice?.main;
-    let html=`<div class="ov" id="ovLay"><div class="det"><div class="det-top"><div><div class="det-t">${escapeHtml(r.evento||r.match)}</div><div class="det-sub">${r.ora||''}</div></div><button class="det-x" id="closeDetBtn">✕</button></div>`;
+    let html=`<div class="ov" id="ovLay"><div class="det"><div class="det-top"><div><div class="det-t">${escapeHtml(r.evento||r.match||r.nome)}</div><div class="det-sub">${r.ora||''}</div></div><button class="det-x" id="closeDetBtn">✕</button></div>`;
     if(ST.market==='pronostici'&&m){
       html+=`<div class="abar"><div><div class="abar-lb">Confidenza</div><div class="abar-sc" style="color:${r.confidence>=70?'var(--grn)':r.confidence>=50?'var(--amb)':'var(--t3)'};">${r.confidence}%</div></div></div>`;
       html+=`<div class="dg"><div class="dc"><div class="dc-l">Pronostico</div><div class="dc-v g">${m.tier} ${m.market}</div></div><div class="dc"><div class="dc-l">Quota</div><div class="dc-v">${r.quota?.toFixed(2)||'—'}</div></div></div>`;
@@ -595,6 +593,9 @@ button{border:none;background:none;cursor:pointer}
       const sub=e.target.closest('[data-sub]'); if(sub){ ST.sub=sub.dataset.sub; render(); return; }
       const iacat=e.target.closest('[data-iacat]'); if(iacat){ ST.iaCat=iacat.dataset.iacat; render(); return; }
       const plsub=e.target.closest('[data-plsub]'); if(plsub){ ST.plSub=plsub.dataset.plsub; render(); return; }
+      const qf=e.target.closest('[data-qfilter]'); if(qf){ ST.quoteFilter=qf.dataset.qfilter; render(); return; }
+      const gzf=e.target.closest('[data-gzfilter]'); if(gzf){ ST.gzFilter=gzf.dataset.gzfilter; render(); return; }
+      const gzs=e.target.closest('[data-gzsort]'); if(gzs){ ST.gzSort=gzs.dataset.gzsort; ST.sortMode=gzs.dataset.gzsort==='time'?'time':'score'; render(); return; }
       const open=e.target.closest('[data-open]'); if(open){ openDetail(parseInt(open.dataset.open)); return; }
       if(e.target.id==='pdfBtn'){ alert('PDF esportato (demo).'); }
     });
@@ -613,7 +614,6 @@ button{border:none;background:none;cursor:pointer}
     renderRows();
   }
 
-  // Restore datasets da localStorage (opzionale)
   function restoreDatasets(){ DATASETS.forEach(d=>{ const saved=localStorage.getItem('ma_'+d.key); if(saved) try{ ST[d.key]=JSON.parse(saved); }catch(e){} }); }
   function persistDatasets(){ DATASETS.forEach(d=>{ if(ST[d.key].length) localStorage.setItem('ma_'+d.key, JSON.stringify(ST[d.key])); }); }
   const origParseAndStore = (k,t)=>{ const map={ov05:parseOv05,ggov25:parseGGOv25,mg13:parseMG13,ia:parseIA,plCards:parsePlCards,plShots:parsePlShots,quoteValore:parseQuoteValore,gz:parseGZ,dataMining:parseDataMining}; if(map[k]){ ST[k]=map[k](t); if(k==='dataMining') computeBacktestStats(); persistDatasets(); } };
