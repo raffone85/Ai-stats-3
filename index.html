@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0b0d12">
-<title>Match Analyzer Pro + DataMining (Fase 1)</title>
+<title>Match Analyzer Pro – Fase 3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -98,8 +98,11 @@ button{border:none;background:none;cursor:pointer}
 .badge.info{background:var(--blu-bg);color:var(--blu);border-color:rgba(96,165,250,.2)}
 .badge.alt{background:var(--mag-bg);color:var(--mag);border-color:rgba(192,132,252,.2)}
 .badge.neu{background:rgba(255,255,255,.05);color:var(--t2);border-color:rgba(255,255,255,.08)}
-.badge.dm-strong{background:rgba(74,222,128,.15);color:var(--grn);border-color:rgba(74,222,128,.4)}
-.badge.dm-weak{background:rgba(251,146,60,.1);color:var(--org);border-color:rgba(251,146,60,.3)}
+/* Nuovi stili per badge semaforici */
+.badge.dm-green{background:rgba(74,222,128,.15);color:var(--grn);border-color:rgba(74,222,128,.4)}
+.badge.dm-yellow{background:rgba(251,191,36,.1);color:var(--amb);border-color:rgba(251,191,36,.4)}
+.badge.dm-red{background:rgba(248,113,113,.1);color:var(--red);border-color:rgba(248,113,113,.3)}
+.badge.value{background:rgba(192,132,252,.15);color:var(--mag);border-color:rgba(192,132,252,.4)}
 .boost-indicator{font-size:0.9rem;margin-left:4px;color:var(--grn)}
 .aff{display:flex;align-items:center;gap:3px}
 .aff-d{width:6px;height:6px;border-radius:50%}
@@ -161,6 +164,10 @@ button{border:none;background:none;cursor:pointer}
 .mini.dim{background:var(--s2);color:var(--t2)}
 .btn.ghost{background:transparent;border:1px solid var(--brd);padding:8px 12px;border-radius:8px;color:var(--t2)}
 .btn.danger{color:var(--red);border-color:var(--red)}
+/* Barre di probabilità */
+.prob-bar-container{display:flex;align-items:center;gap:8px;margin:4px 0}
+.prob-bar{flex:1;height:6px;background:var(--s3);border-radius:3px;overflow:hidden}
+.prob-fill{height:100%;background:var(--grn);border-radius:3px}
 @media(max-width:600px){
   .mrow{grid-template-columns:48px 1fr auto;gap:8px;padding:11px 12px}
   .hdr{flex-direction:column;align-items:flex-start}
@@ -371,6 +378,60 @@ button{border:none;background:none;cursor:pointer}
     const npWeight = Math.min(np / 50, 1.2);
     const percWeight = 0.8 + (perc / 100) * 0.6;
     return npWeight * percWeight;
+  }
+
+  // ==================== BADGE SEMAFORICO DATAMINING ====================
+  function getDMBadgeClass(dm, market) {
+    if (!dm) return '';
+    const np = dm.np;
+    let perc = 0;
+    switch (market) {
+      case 'ov05': perc = dm.pOV05pt; break;
+      case 'gg': perc = dm.pGG; break;
+      case 'o25': perc = dm.pOV25; break;
+      case 'u25': perc = dm.pUN35; break;
+      default: return 'neu';
+    }
+    if (np >= 30 && perc >= (market === 'u25' ? 60 : 55)) return 'dm-green';
+    if (np >= 15 && perc >= (market === 'u25' ? 50 : 45)) return 'dm-yellow';
+    return 'dm-red';
+  }
+
+  function dmBadgeHtml(dm, market) {
+    if (!dm) return '';
+    let perc = 0, quota = 0, label = '';
+    switch (market) {
+      case 'ov05': perc = dm.pOV05pt; quota = dm.qOV05pt; label = 'OV0.5PT'; break;
+      case 'gg': perc = dm.pGG; quota = dm.qGG; label = 'GG'; break;
+      case 'o25': perc = dm.pOV25; quota = dm.qOV25; label = 'OV25'; break;
+      case 'u25': perc = dm.pUN35; quota = dm.qUN35; label = 'UN35'; break;
+      default: return '';
+    }
+    const badgeClass = getDMBadgeClass(dm, market);
+    const icon = badgeClass === 'dm-green' ? '🟢' : badgeClass === 'dm-yellow' ? '🟡' : '🔴';
+    return `<span class="badge ${badgeClass}" title="NP=${dm.np}">${icon} ${label}: ${perc.toFixed(0)}% (${quota.toFixed(2)}) NP:${dm.np}</span>`;
+  }
+
+  // ==================== VALUE ====================
+  function computeValue(perc, quota) {
+    if (!quota || quota <= 0) return 0;
+    const implied = 1 / quota;
+    return (perc / 100) - implied;
+  }
+
+  function valueBadgeHtml(dm, market) {
+    if (!dm) return '';
+    let perc = 0, quota = 0;
+    switch (market) {
+      case 'ov05': perc = dm.pOV05pt; quota = dm.qOV05pt; break;
+      case 'gg': perc = dm.pGG; quota = dm.qGG; break;
+      case 'o25': perc = dm.pOV25; quota = dm.qOV25; break;
+      case 'u25': perc = dm.pUN35; quota = dm.qUN35; break;
+      default: return '';
+    }
+    const value = computeValue(perc, quota);
+    if (value > 0.05) return `<span class="badge value" title="Vantaggio rispetto alla quota">💰 Value +${(value*100).toFixed(1)}%</span>`;
+    return '';
   }
 
   // ==================== BACKTEST ====================
@@ -880,25 +941,20 @@ button{border:none;background:none;cursor:pointer}
     const boosted = r.dm && r.originalAff && r.aff > r.originalAff;
     const affDisplay = boosted ? `<span>${affBadge(r.aff)} <span class="boost-indicator">⬆️</span></span>` : affBadge(r.aff);
     if(ST.market==='ov05'){
-      const dm = r.dm;
-      const dmStrength = dm && dm.np >= 30 && dm.pOV05pt >= 60 ? 'dm-strong' : 'dm-weak';
-      const dmBadge = dm ? `<span class="badge ${dmStrength}" title="NP=${dm.np}">📊 ${dm.pOV05pt.toFixed(0)}% (${dm.qOV05pt.toFixed(2)}) NP:${dm.np}</span>` : '';
-      html=`<div class="mrow" ${rowOpenAttr(i)}><div class="m-ora">${escapeHtml(r.ora||'--:--')}</div><div><div class="m-name">${escapeHtml(r.evento)}</div><div class="m-sub">${r.m1?'<span class="badge good">M1</span>':''}${r.gzAlign?`<span class="badge ${r.gzAlign.aligned?'good':'neu'}">GZ ${escapeHtml(r.gzAlign.prob.label)}</span>`:''}${r.qvAlign&&marketSupportsQuote('ov05',r.qvAlign)?`<span class="badge alt">1X2 ${escapeHtml(r.qvAlign.golSide)}</span>`:''}${dmBadge}</div></div><div class="m-right">${affDisplay}${r.ind?indB(r.ind,'ov05'):dm?`<div class="m-ind ${dm.ic<=320?'ind-g':dm.ic<=340?'ind-o':'ind-r'}">${dm.ic}</div>`:''}</div></div>`;
+      const dmBadge = dmBadgeHtml(r.dm, 'ov05');
+      const valueBadge = valueBadgeHtml(r.dm, 'ov05');
+      html=`<div class="mrow" ${rowOpenAttr(i)}><div class="m-ora">${escapeHtml(r.ora||'--:--')}</div><div><div class="m-name">${escapeHtml(r.evento)}</div><div class="m-sub">${r.m1?'<span class="badge good">M1</span>':''}${r.gzAlign?`<span class="badge ${r.gzAlign.aligned?'good':'neu'}">GZ ${escapeHtml(r.gzAlign.prob.label)}</span>`:''}${r.qvAlign&&marketSupportsQuote('ov05',r.qvAlign)?`<span class="badge alt">1X2 ${escapeHtml(r.qvAlign.golSide)}</span>`:''}${dmBadge}${valueBadge}</div></div><div class="m-right">${affDisplay}${r.ind?indB(r.ind,'ov05'):r.dm?`<div class="m-ind ${r.dm.ic<=320?'ind-g':r.dm.ic<=340?'ind-o':'ind-r'}">${r.dm.ic}</div>`:''}</div></div>`;
     } else if(['gg','o25','u25'].includes(ST.market)){
-      const dm = r.dm;
-      const marketKey = ST.market==='gg'?'GG':ST.market==='o25'?'OV25':'UN35';
-      const perc = ST.market==='gg'?dm?.pGG:ST.market==='o25'?dm?.pOV25:dm?.pUN35;
-      const quota = ST.market==='gg'?dm?.qGG:ST.market==='o25'?dm?.qOV25:dm?.qUN35;
-      const dmStrength = dm && dm.np >= 30 && perc >= (ST.market==='u25'?60:50) ? 'dm-strong' : 'dm-weak';
-      const dmBadge = dm ? `<span class="badge ${dmStrength}" title="NP=${dm.np}">📊 ${marketKey}: ${perc.toFixed(0)}% (${quota.toFixed(2)}) NP:${dm.np}</span>` : '';
-      const indVal = ST.market==='gg'? (r.igbt||dm?.igbt) : (r.igbt||dm?.igbt);
-      html=`<div class="mrow" ${rowOpenAttr(i)}><div class="m-ora">${escapeHtml(r.ora||'--:--')}</div><div><div class="m-name">${escapeHtml(r.evento)}</div><div class="m-sub"><span>${escapeHtml(r.lega||r.nazione||'')}</span>${r.m1?'<span class="badge good">M1</span>':''}${r.gzAlign?`<span class="badge ${r.gzAlign.aligned?'good':'neu'}">GZ ${escapeHtml(r.gzAlign.prob.label)}</span>`:''}${dmBadge}</div></div><div class="m-right">${affDisplay}${indB(indVal,'igbt')}</div></div>`;
+      const dmBadge = dmBadgeHtml(r.dm, ST.market);
+      const valueBadge = valueBadgeHtml(r.dm, ST.market);
+      const indVal = ST.market==='gg'? (r.igbt||r.dm?.igbt) : (r.igbt||r.dm?.igbt);
+      html=`<div class="mrow" ${rowOpenAttr(i)}><div class="m-ora">${escapeHtml(r.ora||'--:--')}</div><div><div class="m-name">${escapeHtml(r.evento)}</div><div class="m-sub"><span>${escapeHtml(r.lega||r.nazione||'')}</span>${r.m1?'<span class="badge good">M1</span>':''}${r.gzAlign?`<span class="badge ${r.gzAlign.aligned?'good':'neu'}">GZ ${escapeHtml(r.gzAlign.prob.label)}</span>`:''}${dmBadge}${valueBadge}</div></div><div class="m-right">${affDisplay}${indB(indVal,'igbt')}</div></div>`;
     } else if(ST.market==='mg13'){
       const side=ST.sub==='ospite'?'O':'C';
       const showAff=ST.sub==='ospite'?r.away.aff:r.house.aff;
       const ind=ST.sub==='ospite'?r.ica:r.ich;
       const dm = r.dm;
-      const dmStrength = dm && dm.np >= 30 ? 'dm-strong' : 'dm-weak';
+      const dmStrength = dm && dm.np >= 30 ? 'dm-green' : (dm && dm.np >= 15 ? 'dm-yellow' : 'dm-red');
       const dmBadge = dm ? `<span class="badge ${dmStrength}" title="NP=${dm.np}">📊 MGE:${dm.mge.toFixed(2)} DIFF:${dm.diff.toFixed(2)} NP:${dm.np}</span>` : '';
       const mg24Badge = dm && isMG24(dm) ? `<span class="badge alt">🔥 MG 2-4 (1.50)</span>` : '';
       html=`<div class="mrow" ${rowOpenAttr(i)}><div class="m-ora">${escapeHtml(r.ora||'--:--')}</div><div><div class="m-name">${escapeHtml(r.evento)}</div><div class="m-sub"><span class="badge alt">${ST.sub==='ospite'?'Ospite':'Casa / Mix'}</span>${r.m1c?'<span class="badge good">M1 C</span>':''}${r.m1o?'<span class="badge info">M1 O</span>':''}${dmBadge}${mg24Badge}</div></div><div class="m-right">${affDisplay}${ind?indB(ind,'mg'):dm?`<div class="m-ind ${dm.mge>=3?'ind-g':dm.mge>=2.5?'ind-o':'ind-r'}">${dm.mge.toFixed(1)}</div>`:''}</div></div>`;
@@ -915,6 +971,29 @@ button{border:none;background:none;cursor:pointer}
     return html + `<div class="pickbar"><button class="pickbtn" data-addpick="${i}">➕ Aggiungi allo storico</button></div>`;
   }
 
+  // ==================== BARRE DI PROBABILITÀ PER RISULTATI ESATTI ====================
+  function renderExactScoresWithBars(reString) {
+    if (!reString) return '';
+    const scores = reString.split(/\s{2,}/).filter(s => s.includes('%'));
+    const items = scores.map(s => {
+      const parts = s.trim().split(':');
+      const score = parts[0].trim();
+      const perc = parseFloat(parts[1].replace('%', ''));
+      return { score, perc };
+    }).sort((a,b) => b.perc - a.perc).slice(0, 4);
+    if (!items.length) return '';
+    const maxPerc = items[0].perc;
+    return `<div class="bk"><div class="bk-t">🔮 Risultati esatti più probabili</div>` +
+      items.map(it => {
+        const barWidth = (it.perc / maxPerc) * 100;
+        return `<div class="prob-bar-container">
+          <div class="n" style="min-width:40px;">${it.score}</div>
+          <div class="prob-bar"><div class="prob-fill" style="width:${barWidth}%;"></div></div>
+          <div class="p pos" style="min-width:45px;text-align:right;">${it.perc.toFixed(1)}%</div>
+        </div>`;
+      }).join('') + `</div>`;
+  }
+
   function detailKv(label,val,cls='n'){return `<div class="dc"><div class="dc-l">${escapeHtml(label)}</div><div class="dc-v ${cls}">${escapeHtml(val)}</div></div>`;}
   function breakdownHtml(breakdown){if(!breakdown||!breakdown.length)return '<div class="note">Nessun breakdown disponibile.</div>';const total=breakdown.reduce((s,x)=>s+x.p,0);return `<div class="bk"><div class="bk-t">Breakdown punteggio</div>${breakdown.map(x=>`<div class="bk-r"><div class="n">${escapeHtml(x.n)}</div><div class="p ${x.p>0?'pos':'zero'}">+${fmt(x.p,2)}</div></div>`).join('')}<div class="bk-tot"><span>Totale</span><span class="p">${fmt(total,2)}</span></div></div>`;}
   function openDetail(idx){const rows=currentRows();const r=rows[idx];if(!r)return;ST.det=r;ST.detMarket=ST.market;renderDetail();}
@@ -925,7 +1004,7 @@ button{border:none;background:none;cursor:pointer}
     let subtitle=(r.lega||r.nazione||r.partita||r.marketLabel||'')+(r.ora?` • ${r.ora}`:'');
     let score=fmt(r.score||Math.max(r.house?.total||0,r.away?.total||0),2);
     let aff=r.aff||Math.max(r.house?.aff||0,r.away?.aff||0)||3;
-    let cards=''; let breakdown=''; let dmSection='';
+    let cards=''; let breakdown=''; let dmSection=''; let reBars='';
     const dm = r.dm;
     if (dm) {
       dmSection = `<div class="bk"><div class="bk-t">📈 DataMining Plus (NP: ${dm.np})</div><div class="dg">
@@ -944,7 +1023,9 @@ button{border:none;background:none;cursor:pointer}
         ${detailKv('SC', `${dm.pSC.toFixed(0)}% (IGBC ${dm.igbc})`)}
         ${detailKv('SO', `${dm.pSO.toFixed(0)}% (IGBO ${dm.igbo})`)}
       </div>`;
-      if (dm.re) dmSection += `<div class="note">🔮 Risultati esatti più probabili:<br>${escapeHtml(dm.re).replace(/\s+/g, ' ')}</div>`;
+      if (dm.re) {
+        reBars = renderExactScoresWithBars(dm.re);
+      }
       if (isMG24(dm)) dmSection += `<div class="note"><span class="badge alt">🔥 MG 2-4 (quota 1.50)</span> Condizioni: OV15 >60% e UN35 >60%</div>`;
       dmSection += `</div>`;
     }
@@ -967,7 +1048,7 @@ button{border:none;background:none;cursor:pointer}
         detailKv('SC', `${r.pSC.toFixed(0)}% (IGBC ${r.igbc})`),
         detailKv('SO', `${r.pSO.toFixed(0)}% (IGBO ${r.igbo})`),
       ];
-      if(r.re) breakdown = `<div class="bk"><div class="bk-t">Risultati esatti più probabili</div><div class="note">${escapeHtml(r.re).replace(/\s+/g, ' ')}</div></div>`;
+      if(r.re) reBars = renderExactScoresWithBars(r.re);
     } else if(ST.detMarket==='ov05'){
       const [dl,dc]=diffLabel(r.diff);cards=[detailKv('IND',r.ind,r.ind<320?'g':'w'),detailKv('Delta',fmt(r.delta,2)+'%',r.delta<=-20?'g':'n'),detailKv('Diff',dl,dc),detailKv('MGE',fmt(r.mge,2),r.mge>=3?'g':'n'),detailKv('Q Ov0.5',fmt(r.qrOv05,2)),detailKv('U5 / U5CT',`${r.u5Raw||'0|0'} / ${r.u5ctRaw||'0|0'}`),detailKv('COv05 / OOv05',`${fmt(r.cov05,0)}% / ${fmt(r.oov05,0)}%`)];
       breakdown=breakdownHtml(r.breakdown)+`<div class="list-inline">${r.gzAlign?`<span class="badge ${r.gzAlign.aligned?'good':'neu'}">GZ ${escapeHtml(r.gzAlign.prob.desc)}</span>`:''}${r.qvAlign&&marketSupportsQuote('ov05',r.qvAlign)?`<span class="badge alt">1X2 ${escapeHtml(r.qvAlign.golSide)}</span>`:''}</div>`;
@@ -996,7 +1077,7 @@ button{border:none;background:none;cursor:pointer}
       cards=[detailKv('Pronostico top',r.advice.main?.market||'N/D',r.advice.main?'g':'n'),detailKv('Alternativa',r.advice.alt?.market||'N/D'),detailKv('Copertura fonti',`${r.coverage}/5`,r.coverage>=3?'g':'n'),detailKv('Conflitti',r.conflicts,r.conflicts===0?'g':r.conflicts===1?'w':'n'),detailKv('Rischio',r.advice.risk,r.advice.risk==='Basso'?'g':r.advice.risk==='Medio'?'w':'n'),detailKv('GZ / 1X2',`${r.gz?.prob?.label||'N/D'} / ${r.qv?.golSide||'N/D'}`)];
       breakdown=`<div class="bk"><div class="bk-t">Pronostico finale</div><div class="note">${escapeHtml(r.advice.summary)}</div>${(r.advice.tips||[]).slice(0,3).map(x=>`<div class="bk-r"><div class="n">${escapeHtml(x.market)} • ${escapeHtml(x.tier)} • ${escapeHtml(x.reason)}</div><div class="p pos">${fmt(x.score,2)}</div></div>`).join('')}</div>`;
     }
-    document.getElementById('detM').innerHTML=`<div class="ov" id="ovLay" aria-modal="true" role="dialog"><div class="det" onclick="event.stopPropagation()"><div class="det-top"><div><div class="det-t">${escapeHtml(title)}</div><div class="det-sub">${escapeHtml(subtitle)}</div></div><button class="det-x" id="closeDetBtn" aria-label="Chiudi dettagli">✕</button></div><div class="abar"><div><div class="abar-lb">Affidabilità</div><div class="abar-dots">${dots(aff,'lg')}</div></div><div class="abar-r"><div class="abar-lb">Score</div><div class="abar-sc">${escapeHtml(score)}</div><div class="abar-pt">${escapeHtml(ST.detMarket.toUpperCase())}</div></div></div><div class="dg">${cards.join('')}</div>${dmSection}${breakdown}</div></div>`;
+    document.getElementById('detM').innerHTML=`<div class="ov" id="ovLay" aria-modal="true" role="dialog"><div class="det" onclick="event.stopPropagation()"><div class="det-top"><div><div class="det-t">${escapeHtml(title)}</div><div class="det-sub">${escapeHtml(subtitle)}</div></div><button class="det-x" id="closeDetBtn" aria-label="Chiudi dettagli">✕</button></div><div class="abar"><div><div class="abar-lb">Affidabilità</div><div class="abar-dots">${dots(aff,'lg')}</div></div><div class="abar-r"><div class="abar-lb">Score</div><div class="abar-sc">${escapeHtml(score)}</div><div class="abar-pt">${escapeHtml(ST.detMarket.toUpperCase())}</div></div></div><div class="dg">${cards.join('')}</div>${dmSection}${reBars}${breakdown}</div></div>`;
     document.getElementById('ovLay').addEventListener('click', closeDetail);
     document.getElementById('closeDetBtn').addEventListener('click', closeDetail);
   }
