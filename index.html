@@ -405,6 +405,7 @@ button{border:none;background:none;cursor:pointer}
   function getGzRows(){return ST.gz.map(r=>({...r,prob:gzProbability(r.gz),score:Math.abs(r.gz||0)}));}
   function getGeneralRows(){return[];}
   function getDataMiningRows(){return ST.dataMining;}
+
   // ==================== PRONOSTICI (MATCH HUB POTENZIATO) ====================
   function buildPronostici(){
     const map={}; const ensure=(e,o)=>{const k=normName(e); if(!k)return null; if(!map[k])map[k]={key:k,evento:e,ora:o,ov05:null,gg:null,o25:null,u25:null,mg13:null,ia:null,qv:null,gz:null,dm:null}; return map[k];};
