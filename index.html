@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0b0d12">
-<title>Match Analyzer Pro – Completo</title>
+<title>Match Analyzer Pro – FIX Dettagli</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -144,7 +144,6 @@ button{border:none;background:none;cursor:pointer}
 .footer-note{margin-top:10px;color:var(--t3);font:.78rem var(--S)}
 .pickbar{margin-top:6px;display:flex;justify-content:flex-end}
 .pickbtn{background:var(--blu-bg);color:var(--blu);border:1px solid rgba(96,165,250,.2);padding:4px 12px;border-radius:6px;font:700 .75rem var(--M);cursor:pointer}
-/* Pronostici */
 .pick-row{display:flex;flex-direction:column;padding:14px;background:var(--s1);border:1.5px solid transparent;border-radius:14px;cursor:pointer;transition:all .15s}
 .pick-row:hover{border-color:var(--brd2);background:var(--s2)}
 .pick-main{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px}
@@ -295,53 +294,7 @@ button{border:none;background:none;cursor:pointer}
   function parsePlShots(t){const L=parseCsvLines(t);if(L.length<2)return[];const sep=L[0].includes(';')?';':',';const s=x=>(x||'').replace(/^"|"$/g,'').trim();const h=splitCsvLine(L[0],sep).map(s);const hi={};h.forEach((x,i)=>hi[x]=i);const g=(r,k)=>s(r[hi[k]]||'');const pf=x=>parseFloat((x||'0').replace(',','.'))||0;const R=[];for(let i=1;i<L.length;i++){const f=splitCsvLine(L[i],sep).map(s);if(f.length<5)continue;const oR=g(f,'Ora');const tm=oR.match(/(\d{1,2}:\d{2})/);const dt=oR.match(/(\d{2}-\d{2})/);const ora=(dt?dt[1].replace('-','/')+' ':'')+(tm?tm[1]:'');R.push({ora:ora.trim(),lega:g(f,'Campionato'),partita:g(f,'Partita'),nome:g(f,'Nome'),squadra:g(f,'Squadra'),pos:g(f,'Pos.'),pres:parseInt(pf(g(f,'Presenze'))),min:pf(g(f,'Minuti')),tiriTot:pf(g(f,'Tiri Totali')),tiriPorta:pf(g(f,'Tiri in porta')),gol:pf(g(f,'Gol')),rit:parseInt(g(f,'Rit.'))||0});}return R;}
   function parseGZ(t){const L=parseCsvLines(t);if(L.length<2)return[];const sep=L[0].includes(';')?';':',';const s=x=>(x||'').replace(/^"|"$/g,'').trim();const h=splitCsvLine(L[0],sep).map(s);const hi={};h.forEach((x,i)=>hi[x]=i);const g=(r,k)=>s(r[hi[k]]||'');const pf=x=>{if(x===''||x===undefined)return null;const v=parseFloat(String(x).replace(',','.'));return isNaN(v)?null:v;};const R=[];for(let i=1;i<L.length;i++){const f=splitCsvLine(L[i],sep).map(s);if(f.length<3)continue;let dataEv=g(f,'DATA EV.');const tm=dataEv.match(/(\d{1,2}:\d{2})/);const dt=dataEv.match(/(\d{2}-\d{2})/);const ora=(dt?dt[1].replace('-','/')+' ':'')+(tm?tm[1]:'');const evento=g(f,'EVENTO');if(!evento)continue;R.push({ora:ora.trim(),nazione:g(f,'NAZIONE'),lega:g(f,'LEGA'),evento:evento,ris:g(f,'RIS.'),gz:pf(g(f,'GZ')),gzha:pf(g(f,'GZha')),igbc:pf(g(f,'IGBc')),igbo:pf(g(f,'IGBo')),igbt:pf(g(f,'IGBt')),mge:pf(g(f,'MGE')),diff:pf(g(f,'Diff'))});}return R;}
   function parseQuoteValore(t){const L=parseCsvLines(t);if(L.length<2)return[];const sep=L[0].includes(';')?';':',';const s=x=>(x||'').replace(/^"|"$/g,'').trim();const h=splitCsvLine(L[0],sep).map(s);const idxOra=h.indexOf('Ora');const idxMatch=h.indexOf('Match');const idxR=h.indexOf('R');const idxNP=h.indexOf('NP');const idxT1=h.indexOf('T1');const idxR1=h.indexOf('R1');const idxDM1=h.indexOf('DM1');const idxSpread1=h.indexOf('Spread');const idxTX=h.indexOf('TX');const idxRX=h.indexOf('RX');const idxDMX=h.indexOf('DMX');const idxSpreadX=h.indexOf('Spread',idxDMX+1);const idxT2=h.indexOf('T2');const idxR2=h.indexOf('R2');const idxDM2=h.indexOf('DM2');const idxSpread2=h.indexOf('Spread',idxDM2+1);const pf=x=>{if(x===''||x===undefined)return 0;const v=parseFloat(String(x).replace(',','.'));return isNaN(v)?0:v;};const R=[];for(let i=1;i<L.length;i++){const f=splitCsvLine(L[i],sep).map(s);if(f.length<5)continue;const ora=s(f[idxOra]||'');const match=s(f[idxMatch]||'');if(!match)continue;R.push({ora,match,r:s(f[idxR]||''),np:parseInt(pf(f[idxNP]))||0,t1:pf(f[idxT1]),r1:pf(f[idxR1]),dm1:pf(f[idxDM1]),spread1:pf(f[idxSpread1]),tx:pf(f[idxTX]),rx:pf(f[idxRX]),dmx:pf(f[idxDMX]),spreadX:pf(f[idxSpreadX]),t2:pf(f[idxT2]),r2:pf(f[idxR2]),dm2:pf(f[idxDM2]),spread2:pf(f[idxSpread2])});}return R;}
-  function parseDataMining(t) {
-    const L = parseCsvLines(t); if (L.length < 2) return [];
-    const sep = L[0].includes(';') ? ';' : ',';
-    const s = x => (x || '').replace(/^"|"$/g, '').trim();
-    const header = splitCsvLine(L[0], sep).map(s);
-    const idx = (name) => header.findIndex(h => h.includes(name));
-    const iOra = idx('Ora'), iMatch = idx('Match'), iR = idx('R'), iRpt = idx('Rpt'), iNP = idx('NP');
-    const i1Perc = header.findIndex((h, i) => h === '1' && i > 5), i1Quota = i1Perc + 1;
-    const iXPerc = i1Quota + 1, iXQuota = iXPerc + 1;
-    const i2Perc = iXQuota + 1, i2Quota = i2Perc + 1;
-    const iMGE = idx('MGE'), iDIFF = idx('DIFF');
-    const iGGPerc = header.findIndex((h, i) => h === 'GG' && i > iDIFF), iGGQuota = iGGPerc + 1;
-    const iOV15Perc = idx('OV15'), iOV15Quota = iOV15Perc + 1;
-    const iOV25Perc = idx('OV25'), iOV25Quota = iOV25Perc + 1;
-    const iUN35Perc = idx('UN35'), iUN35Quota = iUN35Perc + 1;
-    const iOV05ptPerc = idx('OV0.5pt'), iOV05ptQuota = iOV05ptPerc + 1;
-    const iIC = idx('IC'), iRC = idx('RC'), iRO = idx('RO');
-    const iSCPerc = idx('SC'), iIGBC = idx('IGBC'), iSCQuota = iSCPerc + 1;
-    const iSOPerc = idx('SO'), iIGBO = idx('IGBO'), iSOQuota = iSOPerc + 1;
-    const iRE = idx('RE');
-    const R = [];
-    for (let i = 1; i < L.length; i++) {
-      const f = splitCsvLine(L[i], sep).map(s); if (f.length < 5) continue;
-      const parsePerc = (v) => parseFloat((v || '0').replace('%', '').replace(',', '.')) || 0;
-      const parseFloatNum = (v) => parseFloat((v || '').replace(',', '.')) || 0;
-      const parseIntNum = (v) => parseInt(v) || 0;
-      const oraRaw = f[iOra] || '', match = f[iMatch] || ''; if (!match) continue;
-      const tm = oraRaw.match(/(\d{1,2}:\d{2})/), ora = tm ? tm[1] : oraRaw;
-      R.push({
-        ora, match, r: f[iR] || '', rpt: f[iRpt] || '', np: parseIntNum(f[iNP]),
-        p1: parsePerc(f[i1Perc]), q1: parseFloatNum(f[i1Quota]),
-        pX: parsePerc(f[iXPerc]), qX: parseFloatNum(f[iXQuota]),
-        p2: parsePerc(f[i2Perc]), q2: parseFloatNum(f[i2Quota]),
-        mge: parseFloatNum(f[iMGE]), diff: parseFloatNum(f[iDIFF]),
-        pGG: parsePerc(f[iGGPerc]), qGG: parseFloatNum(f[iGGQuota]),
-        pOV15: parsePerc(f[iOV15Perc]), qOV15: parseFloatNum(f[iOV15Quota]),
-        pOV25: parsePerc(f[iOV25Perc]), qOV25: parseFloatNum(f[iOV25Quota]),
-        pUN35: parsePerc(f[iUN35Perc]), qUN35: parseFloatNum(f[iUN35Quota]),
-        pOV05pt: parsePerc(f[iOV05ptPerc]), qOV05pt: parseFloatNum(f[iOV05ptQuota]),
-        ic: parseIntNum(f[iIC]), rc: parseIntNum(f[iRC]), ro: parseIntNum(f[iRO]),
-        pSC: parsePerc(f[iSCPerc]), igbc: parseIntNum(f[iIGBC]), qSC: parseFloatNum(f[iSCQuota]),
-        pSO: parsePerc(f[iSOPerc]), igbo: parseIntNum(f[iIGBO]), qSO: parseFloatNum(f[iSOQuota]),
-        re: f[iRE] || ''
-      });
-    }
-    return R;
-  }
+  function parseDataMining(t){const L=parseCsvLines(t);if(L.length<2)return[];const sep=L[0].includes(';')?';':',';const s=x=>(x||'').replace(/^"|"$/g,'').trim();const h=splitCsvLine(L[0],sep).map(s);const idx=n=>h.findIndex(c=>c.includes(n));const iOra=idx('Ora'),iMatch=idx('Match'),iR=idx('R'),iRpt=idx('Rpt'),iNP=idx('NP');const i1Perc=h.findIndex((c,i)=>c==='1'&&i>5),i1Quota=i1Perc+1;const iXPerc=i1Quota+1,iXQuota=iXPerc+1;const i2Perc=iXQuota+1,i2Quota=i2Perc+1;const iMGE=idx('MGE'),iDIFF=idx('DIFF');const iGGPerc=h.findIndex((c,i)=>c==='GG'&&i>iDIFF),iGGQuota=iGGPerc+1;const iOV15Perc=idx('OV15'),iOV15Quota=iOV15Perc+1;const iOV25Perc=idx('OV25'),iOV25Quota=iOV25Perc+1;const iUN35Perc=idx('UN35'),iUN35Quota=iUN35Perc+1;const iOV05ptPerc=idx('OV0.5pt'),iOV05ptQuota=iOV05ptPerc+1;const iIC=idx('IC'),iRC=idx('RC'),iRO=idx('RO');const iSCPerc=idx('SC'),iIGBC=idx('IGBC'),iSCQuota=iSCPerc+1;const iSOPerc=idx('SO'),iIGBO=idx('IGBO'),iSOQuota=iSOPerc+1;const iRE=idx('RE');const R=[];for(let i=1;i<L.length;i++){const f=splitCsvLine(L[i],sep).map(s);if(f.length<5)continue;const parsePerc=v=>parseFloat((v||'0').replace('%','').replace(',','.'))||0;const parseNum=v=>parseFloat((v||'').replace(',','.'))||0;const parseIntNum=v=>parseInt(v)||0;const oraRaw=f[iOra]||'',match=f[iMatch]||'';if(!match)continue;const tm=oraRaw.match(/(\d{1,2}:\d{2})/),ora=tm?tm[1]:oraRaw;R.push({ora,match,r:f[iR]||'',rpt:f[iRpt]||'',np:parseIntNum(f[iNP]),p1:parsePerc(f[i1Perc]),q1:parseNum(f[i1Quota]),pX:parsePerc(f[iXPerc]),qX:parseNum(f[iXQuota]),p2:parsePerc(f[i2Perc]),q2:parseNum(f[i2Quota]),mge:parseNum(f[iMGE]),diff:parseNum(f[iDIFF]),pGG:parsePerc(f[iGGPerc]),qGG:parseNum(f[iGGQuota]),pOV15:parsePerc(f[iOV15Perc]),qOV15:parseNum(f[iOV15Quota]),pOV25:parsePerc(f[iOV25Perc]),qOV25:parseNum(f[iOV25Quota]),pUN35:parsePerc(f[iUN35Perc]),qUN35:parseNum(f[iUN35Quota]),pOV05pt:parsePerc(f[iOV05ptPerc]),qOV05pt:parseNum(f[iOV05ptQuota]),ic:parseIntNum(f[iIC]),rc:parseIntNum(f[iRC]),ro:parseIntNum(f[iRO]),pSC:parsePerc(f[iSCPerc]),igbc:parseIntNum(f[iIGBC]),qSC:parseNum(f[iSCQuota]),pSO:parsePerc(f[iSOPerc]),igbo:parseIntNum(f[iIGBO]),qSO:parseNum(f[iSOQuota]),re:f[iRE]||''});}return R;}
 
   // ==================== SCORING ORIGINALE ====================
   function ov05M1(r){return r.ind<320&&r.delta<-20&&r.diff<0}
@@ -458,6 +411,7 @@ button{border:none;background:none;cursor:pointer}
     }
     return rows.sort((a,b)=>b.confidence-a.confidence||sortTime(a,b));
   }
+
   function currentRows(){
     if(ST.market==='pronostici'){let r=buildPronostici(); r=filt(r); if(ST.pronosticiFilter==='top') r=r.filter(x=>x.advice.main?.tier?.includes('TOP')); return r;}
     if(ST.market==='ov05') return getOv05Rows();
@@ -564,26 +518,94 @@ button{border:none;background:none;cursor:pointer}
     return html+`<div class="pickbar"><button class="pickbtn" data-addpick="${i}">➕ Storico</button></div>`;
   }
 
-  function openDetail(idx){ const r=currentRows()[idx]; if(!r)return; ST.det=r; renderDetail(); }
-  function closeDetail(){ ST.det=null; document.getElementById('detM').innerHTML=''; }
-  function renderDetail(){
-    const r=ST.det; if(!r)return; const m=r.advice?.main;
-    let html=`<div class="ov" id="ovLay"><div class="det"><div class="det-top"><div><div class="det-t">${escapeHtml(r.evento||r.match||r.nome)}</div><div class="det-sub">${r.ora||''}</div></div><button class="det-x" id="closeDetBtn">✕</button></div>`;
-    if(ST.market==='pronostici'&&m){
-      html+=`<div class="abar"><div><div class="abar-lb">Confidenza</div><div class="abar-sc" style="color:${r.confidence>=70?'var(--grn)':r.confidence>=50?'var(--amb)':'var(--t3)'};">${r.confidence}%</div></div></div>`;
-      html+=`<div class="dg"><div class="dc"><div class="dc-l">Pronostico</div><div class="dc-v g">${m.tier} ${m.market}</div></div><div class="dc"><div class="dc-l">Quota</div><div class="dc-v">${r.quota?.toFixed(2)||'—'}</div></div></div>`;
-      if(r.dm){ html+=`<div class="bk"><div class="bk-t">📊 DataMining (NP ${r.dm.np})</div><div class="note">OV25: ${r.dm.pOV25.toFixed(0)}% (${r.dm.qOV25.toFixed(2)}) | GG: ${r.dm.pGG.toFixed(0)}% (${r.dm.qGG.toFixed(2)}) | UN35: ${r.dm.pUN35.toFixed(0)}% (${r.dm.qUN35.toFixed(2)})</div>`; if(r.dm.re) html+=`<div class="note">🔮 ${escapeHtml(r.dm.re)}</div>`; html+=`</div>`; }
-      html+=`<div class="note">Copertura: ${r.coverage}/5 • Conflitti: ${r.conflicts}</div>`;
-    } else {
-      html+=`<div class="note">Dettaglio non disponibile per questa vista.</div>`;
-    }
-    html+=`</div></div>`; document.getElementById('detM').innerHTML=html;
-    document.getElementById('ovLay').addEventListener('click',closeDetail); document.getElementById('closeDetBtn').addEventListener('click',closeDetail);
+  // ==================== DETTAGLIO MODALE (FIXATO) ====================
+  function openDetail(idx){ 
+    const rows=currentRows(); 
+    const r=rows[idx]; 
+    if(!r) return; 
+    ST.det=r; 
+    ST.detMarket=ST.market; 
+    renderDetail(); 
   }
+  function closeDetail(){ ST.det=null; ST.detMarket=null; document.getElementById('detM').innerHTML=''; document.body.style.overflow=''; }
+  function renderDetail(){
+    const r=ST.det; if(!r)return; document.body.style.overflow='hidden';
+    let title=r.evento||r.match||r.nome||'Dettaglio';
+    let subtitle=(r.lega||r.nazione||r.partita||r.marketLabel||'')+(r.ora?` • ${r.ora}`:'');
+    let score=fmt(r.score||Math.max(r.house?.total||0,r.away?.total||0),2);
+    let aff=r.aff||Math.max(r.house?.aff||0,r.away?.aff||0)||3;
+    let cards=''; let breakdown=''; let dmSection='';
+    const dm=r.dm;
+    if(dm){
+      dmSection=`<div class="bk"><div class="bk-t">📈 DataMining Plus (NP: ${dm.np})</div><div class="dg">
+        ${detailKv('1',`${dm.p1.toFixed(0)}% / ${dm.q1.toFixed(2)}`,dm.p1>50?'g':'n')}
+        ${detailKv('X',`${dm.pX.toFixed(0)}% / ${dm.qX.toFixed(2)}`)}
+        ${detailKv('2',`${dm.p2.toFixed(0)}% / ${dm.q2.toFixed(2)}`,dm.p2>50?'g':'n')}
+        ${detailKv('GG',`${dm.pGG.toFixed(0)}% / ${dm.qGG.toFixed(2)}`)}
+        ${detailKv('OV15',`${dm.pOV15.toFixed(0)}% / ${dm.qOV15.toFixed(2)}`)}
+        ${detailKv('OV25',`${dm.pOV25.toFixed(0)}% / ${dm.qOV25.toFixed(2)}`)}
+        ${detailKv('UN35',`${dm.pUN35.toFixed(0)}% / ${dm.qUN35.toFixed(2)}`)}
+        ${detailKv('OV0.5PT',`${dm.pOV05pt.toFixed(0)}% / ${dm.qOV05pt.toFixed(2)}`)}
+        ${detailKv('MGE',dm.mge.toFixed(2))} ${detailKv('DIFF',dm.diff.toFixed(2))}
+        ${detailKv('IC',dm.ic)} ${detailKv('RC/RO',`${dm.rc} / ${dm.ro}`)}
+      </div>`;
+      if(dm.re) dmSection+=`<div class="note">🔮 ${escapeHtml(dm.re)}</div>`;
+      if(isMG24(dm)) dmSection+=`<div class="note"><span class="badge alt">🔥 MG 2-4 (1.50)</span></div>`;
+      dmSection+=`</div>`;
+    }
+    if(ST.detMarket==='pronostici'){
+      const m=r.advice.main;
+      if(m){
+        title=r.evento; subtitle=`${r.ora||''} • Confidenza ${r.confidence}%`;
+        cards=[detailKv('Pronostico',`${m.tier} ${m.market}`,'g'), detailKv('Quota',r.quota?.toFixed(2)||'—')];
+        if(r.dm) cards.push(detailKv('DataMining NP',r.dm.np));
+        cards.push(detailKv('Copertura',`${r.coverage}/5`), detailKv('Conflitti',r.conflicts));
+        breakdown=`<div class="bk"><div class="bk-t">Motivazione</div><div class="note">${m.reason||'Consiglio basato su convergenza dei dati.'}</div></div>`;
+      } else { cards=[detailKv('Nessun consiglio','Dati insufficienti')]; }
+    } else if(ST.detMarket==='ov05'){
+      const [dl,dc]=diffLabel(r.diff); cards=[detailKv('IND',r.ind,r.ind<320?'g':'w'),detailKv('Delta',fmt(r.delta,2)+'%',r.delta<=-20?'g':'n'),detailKv('Diff',dl,dc),detailKv('MGE',fmt(r.mge,2),r.mge>=3?'g':'n'),detailKv('Q Ov0.5',fmt(r.qrOv05,2)),detailKv('U5 / U5CT',`${r.u5Raw||'0|0'} / ${r.u5ctRaw||'0|0'}`),detailKv('COv05 / OOv05',`${fmt(r.cov05,0)}% / ${fmt(r.oov05,0)}%`)];
+      breakdown=breakdownHtml(r.breakdown);
+    } else if(['gg','o25','u25'].includes(ST.detMarket)){
+      const [dl,dc]=diffLabel(r.diff); cards=[detailKv('IGBc',r.igbc,r.igbc>=150?'g':'n'),detailKv('IGBo',r.igbo,r.igbo>=150?'g':'n'),detailKv('IGBt',r.igbt,r.igbt>=300?'g':'n'),detailKv('MGE',fmt(r.mge,2),r.mge>=3?'g':'n'),detailKv('Diff',dl,dc),detailKv('PGG',fmt(r.pgg,1)+'%'),detailKv('S1-S2',r.s12),detailKv('qOv2.5',fmt(r.qov25,2))];
+      breakdown=breakdownHtml(r.breakdown);
+    } else if(ST.detMarket==='mg13'){
+      score=fmt(r.side==='ospite'?r.away.total:r.house.total,2); aff=r.side==='ospite'?r.away.aff:r.house.aff;
+      cards=[detailKv('Pronostico lato',r.side==='ospite'?'MG 1-3 Ospite':'MG 1-3 Casa','g'),detailKv('ICH',r.ich,r.ich<=350?'g':'n'),detailKv('ICA',r.ica,r.ica<=350?'g':'n'),detailKv('VarC / VarO',`${fmt(r.varc,1)}% / ${fmt(r.varo,1)}%`),detailKv('MGFC / MGFO',`${fmt(r.mgfc,2)} / ${fmt(r.mgfo,2)}`),detailKv('MGSO / MGSC',`${fmt(r.mgso,2)} / ${fmt(r.mgsc,2)}`),detailKv('RitC / RitO',`${r.ritc} / ${r.rito}`),detailKv('Q1 / Q2',`${fmt(r.q1,2)} / ${fmt(r.q2,2)}`)];
+      breakdown=`<div class="bk"><div class="bk-t">Casa</div>${r.house.breakdown.map(x=>`<div class="bk-r"><div class="n">${escapeHtml(x.n)}</div><div class="p ${x.p>0?'pos':'zero'}">+${fmt(x.p,2)}</div></div>`).join('')}<div class="bk-tot"><span>Totale Casa</span><span class="p">${fmt(r.house.total,2)}</span></div></div><div class="bk"><div class="bk-t">Ospite</div>${r.away.breakdown.map(x=>`<div class="bk-r"><div class="n">${escapeHtml(x.n)}</div><div class="p ${x.p>0?'pos':'zero'}">+${fmt(x.p,2)}</div></div>`).join('')}<div class="bk-tot"><span>Totale Ospite</span><span class="p">${fmt(r.away.total,2)}</span></div></div>`;
+    } else if(ST.detMarket==='ia'){
+      cards=[detailKv('Lega',r.lega||'N/D'),detailKv('Nazione',r.nazione||'N/D'),detailKv('Stats',r.stats.length),detailKv('Avg Aff',fmt(r.avgAff,2),r.avgAff>=3?'g':'n'),detailKv('Max Aff',fmt(r.maxAff,2),r.maxAff>=3?'g':'n'),detailKv('High Count',r.highCount)];
+      breakdown=`<div class="bk"><div class="bk-t">Predizioni IA</div>${r.stats.map(s=>`<div class="bk-r"><div class="n">${escapeHtml(s.label)} • ${escapeHtml(s.pred)}</div><div class="p ${s.aff>=3?'pos':'zero'}">${fmt(s.aff,1)}</div></div>`).join('')}</div>`;
+    } else if(ST.detMarket==='players'){
+      const isCards=ST.plSub==='cards'; cards=[detailKv('Squadra',r.squadra||'N/D'),detailKv('Partita',r.partita||'N/D'),detailKv('Ruolo',r.pos||'N/D'),detailKv('Minuti',fmt(r.min,0)),detailKv('Presenze',r.pres||0),detailKv(isCards?'Ammonizioni':'Gol',fmt(isCards?r.amm:r.gol,2),isCards?r.amm>=.3?'g':'n':r.gol>=.25?'g':'n'),detailKv(isCards?'Falli':'TiP',fmt(isCards?r.falli:r.tiriPorta,2)),detailKv(isCards?'Tackle':'TT',fmt(isCards?r.tackle:r.tiriTot,2))];
+      breakdown=breakdownHtml(r.breakdown);
+    } else if(ST.detMarket==='quote'){
+      cards=[detailKv('R finale',r.r||'N/D'),detailKv('1',`R ${fmt(r.r1,2)} / DM ${fmt(r.dm1,2)} / Spr ${fmt(r.spread1,2)}`,r.value1?'g':'n'),detailKv('X',`R ${fmt(r.rx,2)} / DM ${fmt(r.dmx,2)} / Spr ${fmt(r.spreadX,2)}`,r.valueX?'w':'n'),detailKv('2',`R ${fmt(r.r2,2)} / DM ${fmt(r.dm2,2)} / Spr ${fmt(r.spread2,2)}`,r.value2?'g':'n'),detailKv('NP',r.np),detailKv('Lato',r.golSide||'Nessuno')];
+      breakdown=`<div class="bk"><div class="bk-t">Value signals</div><div class="bk-r"><div class="n">1 Value</div><div class="p ${r.value1?'pos':'zero'}">${r.value1?'SI':'NO'}</div></div><div class="bk-r"><div class="n">X Value</div><div class="p ${r.valueX?'pos':'zero'}">${r.valueX?'SI':'NO'}</div></div><div class="bk-r"><div class="n">2 Value</div><div class="p ${r.value2?'pos':'zero'}">${r.value2?'SI':'NO'}</div></div><div class="bk-tot"><span>Score spread</span><span class="p">${fmt(r.score,2)}</span></div></div>`;
+    } else if(ST.detMarket==='gz'){
+      cards=[detailKv('GZ',fmt(r.gz,0),Math.abs(r.gz||0)>=5000?'g':'n'),detailKv('Segnale',r.prob.desc,r.prob.type==='over'?'g':r.prob.type==='under'?'w':'n'),detailKv('GZha',fmt(r.gzha,0)),detailKv('IGBc / IGBo / IGBt',`${fmt(r.igbc,0)} / ${fmt(r.igbo,0)} / ${fmt(r.igbt,0)}`),detailKv('MGE',fmt(r.mge,2)),detailKv('Diff',fmt(r.diff,2))];
+      breakdown=`<div class="bk"><div class="bk-t">Interpretazione GZ</div><div class="note">${escapeHtml(r.prob.desc)}. Valori molto lontani dallo zero sono più forti; valori vicini allo zero sono letti come segnali leggeri o neutrali.</div></div>`;
+    } else if(ST.detMarket==='gen'){
+      cards=[detailKv('Mercato',r.market),detailKv('Score',fmt(r.score,2)),detailKv('Affidabilità',`${r.aff||'N/D'}/5`)];
+      breakdown=`<div class="bk"><div class="bk-t">Consiglio generale</div><div class="note">${escapeHtml(r.advice||'Voce aggregata dalla vista generale.')}</div></div>`;
+    } else if(ST.detMarket==='datamining'){
+      title=r.match; subtitle=`NP: ${r.np} • ${r.ora}`;
+      cards=[detailKv('1',`${r.p1.toFixed(0)}% / ${r.q1.toFixed(2)}`,r.p1>50?'g':'n'),detailKv('X',`${r.pX.toFixed(0)}% / ${r.qX.toFixed(2)}`),detailKv('2',`${r.p2.toFixed(0)}% / ${r.q2.toFixed(2)}`,r.p2>50?'g':'n'),detailKv('GG',`${r.pGG.toFixed(0)}% / ${r.qGG.toFixed(2)}`),detailKv('OV15',`${r.pOV15.toFixed(0)}% / ${r.qOV15.toFixed(2)}`),detailKv('OV25',`${r.pOV25.toFixed(0)}% / ${r.qOV25.toFixed(2)}`),detailKv('UN35',`${r.pUN35.toFixed(0)}% / ${r.qUN35.toFixed(2)}`),detailKv('OV0.5PT',`${r.pOV05pt.toFixed(0)}% / ${r.qOV05pt.toFixed(2)}`),detailKv('MGE',r.mge.toFixed(2)),detailKv('DIFF',r.diff.toFixed(2)),detailKv('IC',r.ic),detailKv('RC/RO',`${r.rc} / ${r.ro}`),detailKv('SC',`${r.pSC.toFixed(0)}% (IGBC ${r.igbc})`),detailKv('SO',`${r.pSO.toFixed(0)}% (IGBO ${r.igbo})`)];
+      if(r.re) breakdown=`<div class="bk"><div class="bk-t">Risultati esatti più probabili</div><div class="note">${escapeHtml(r.re)}</div></div>`;
+    } else {
+      cards=[detailKv('Info','Dettaglio non disponibile per questa vista.')];
+    }
+    document.getElementById('detM').innerHTML=`<div class="ov" id="ovLay" aria-modal="true" role="dialog"><div class="det" onclick="event.stopPropagation()"><div class="det-top"><div><div class="det-t">${escapeHtml(title)}</div><div class="det-sub">${escapeHtml(subtitle)}</div></div><button class="det-x" id="closeDetBtn" aria-label="Chiudi dettagli">✕</button></div><div class="abar"><div><div class="abar-lb">Affidabilità</div><div class="abar-dots">${dots(aff,'lg')}</div></div><div class="abar-r"><div class="abar-lb">Score</div><div class="abar-sc">${escapeHtml(score)}</div><div class="abar-pt">${escapeHtml(ST.detMarket.toUpperCase())}</div></div></div><div class="dg">${cards.join('')}</div>${dmSection}${breakdown}</div></div>`;
+    document.getElementById('ovLay').addEventListener('click',closeDetail);
+    document.getElementById('closeDetBtn').addEventListener('click',closeDetail);
+  }
+
+  function detailKv(label,val,cls='n'){return `<div class="dc"><div class="dc-l">${escapeHtml(label)}</div><div class="dc-v ${cls}">${escapeHtml(val)}</div></div>`;}
+  function breakdownHtml(breakdown){if(!breakdown||!breakdown.length)return'<div class="note">Nessun breakdown disponibile.</div>';const total=breakdown.reduce((s,x)=>s+x.p,0);return`<div class="bk"><div class="bk-t">Breakdown punteggio</div>${breakdown.map(x=>`<div class="bk-r"><div class="n">${escapeHtml(x.n)}</div><div class="p ${x.p>0?'pos':'zero'}">+${fmt(x.p,2)}</div></div>`).join('')}<div class="bk-tot"><span>Totale</span><span class="p">${fmt(total,2)}</span></div></div>`;}
 
   // ==================== EVENTI ====================
   function bindEvents(){
     document.getElementById('mtabs').addEventListener('click',e=>{const b=e.target.closest('.mtab'); if(b){ST.market=b.dataset.m; render();}});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&ST.det)closeDetail();});
     document.getElementById('datasetToggle').addEventListener('click',()=>{const p=document.getElementById('datasetPanel'); p.classList.toggle('open'); document.getElementById('toggleArrow').textContent=p.classList.contains('open')?'▲':'▼';});
     document.body.addEventListener('click',e=>{
       const pick=e.target.closest('[data-pick]'); if(pick){ document.getElementById(pick.dataset.pick).click(); return; }
@@ -599,6 +621,7 @@ button{border:none;background:none;cursor:pointer}
       const open=e.target.closest('[data-open]'); if(open){ openDetail(parseInt(open.dataset.open)); return; }
       if(e.target.id==='pdfBtn'){ alert('PDF esportato (demo).'); }
     });
+    document.body.addEventListener('keydown',e=>{const row=e.target.closest('[data-open]'); if(row&&(e.key==='Enter'||e.key===' ')){e.preventDefault(); openDetail(parseInt(row.dataset.open,10));}});
     document.body.addEventListener('change',e=>{ if(e.target.id==='leagueSel'){ ST.league=e.target.value; render(); } });
     document.body.addEventListener('input',e=>{ if(e.target.id==='searchIn'){ ST.q=e.target.value; render(); } });
     document.body.addEventListener('change',e=>{ if(e.target.matches('input[type=file]')) handleUpload(e.target); });
@@ -614,6 +637,7 @@ button{border:none;background:none;cursor:pointer}
     renderRows();
   }
 
+  // Persistenza
   function restoreDatasets(){ DATASETS.forEach(d=>{ const saved=localStorage.getItem('ma_'+d.key); if(saved) try{ ST[d.key]=JSON.parse(saved); }catch(e){} }); }
   function persistDatasets(){ DATASETS.forEach(d=>{ if(ST[d.key].length) localStorage.setItem('ma_'+d.key, JSON.stringify(ST[d.key])); }); }
   const origParseAndStore = (k,t)=>{ const map={ov05:parseOv05,ggov25:parseGGOv25,mg13:parseMG13,ia:parseIA,plCards:parsePlCards,plShots:parsePlShots,quoteValore:parseQuoteValore,gz:parseGZ,dataMining:parseDataMining}; if(map[k]){ ST[k]=map[k](t); if(k==='dataMining') computeBacktestStats(); persistDatasets(); } };
