@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0b0d12">
-<title>Match Analyzer Pro – Definitivo</title>
+<title>Match Analyzer Pro – Completo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -144,7 +144,7 @@ button{border:none;background:none;cursor:pointer}
 .footer-note{margin-top:10px;color:var(--t3);font:.78rem var(--S)}
 .pickbar{margin-top:6px;display:flex;justify-content:flex-end}
 .pickbtn{background:var(--blu-bg);color:var(--blu);border:1px solid rgba(96,165,250,.2);padding:4px 12px;border-radius:6px;font:700 .75rem var(--M);cursor:pointer}
-/* Stili per Pronostici */
+/* Pronostici */
 .pick-row{display:flex;flex-direction:column;padding:14px;background:var(--s1);border:1.5px solid transparent;border-radius:14px;cursor:pointer;transition:all .15s}
 .pick-row:hover{border-color:var(--brd2);background:var(--s2)}
 .pick-main{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px}
@@ -163,7 +163,6 @@ button{border:none;background:none;cursor:pointer}
 .confidence-fill{height:100%;border-radius:3px}
 .confidence-text{font:600 .75rem var(--M);color:var(--t2);min-width:45px;text-align:right}
 .pick-sub{display:flex;gap:12px;font-size:.75rem;color:var(--t3);margin-top:4px}
-.pick-sub span{display:flex;align-items:center;gap:4px}
 .statsgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
 .statcard{background:var(--s2);padding:12px;border-radius:10px;text-align:center}
 .statcard .k{font-size:.75rem;color:var(--t3);text-transform:uppercase}
@@ -198,7 +197,6 @@ button{border:none;background:none;cursor:pointer}
   .toolbar{flex-direction:column;align-items:stretch}
   .toolbar .search,.toolbar .select,.toolbar .pdf-btn,.toolbar .aux-btn{width:100%}
   .det{padding:18px 14px}
-  .pick-main{flex-direction:column;align-items:flex-start}
 }
 </style>
 </head>
@@ -407,7 +405,6 @@ button{border:none;background:none;cursor:pointer}
   function getGzRows(){return ST.gz.map(r=>({...r,prob:gzProbability(r.gz),score:Math.abs(r.gz||0)}));}
   function getGeneralRows(){return[];}
   function getDataMiningRows(){return ST.dataMining;}
-
   // ==================== PRONOSTICI (MATCH HUB POTENZIATO) ====================
   function buildPronostici(){
     const map={}; const ensure=(e,o)=>{const k=normName(e); if(!k)return null; if(!map[k])map[k]={key:k,evento:e,ora:o,ov05:null,gg:null,o25:null,u25:null,mg13:null,ia:null,qv:null,gz:null,dm:null}; return map[k];};
@@ -431,7 +428,6 @@ button{border:none;background:none;cursor:pointer}
       const conv=(m.gz?1:0)+(m.qv?1:0)+(m.ia&&m.ia.avgAff>=2.5?1:0);
       const h={...m,gzOver,gzUnder,gzMid,qvForGoals,qvTight,coverage:cov,conflicts:confl,conv};
 
-      // Genera consigli
       const tips=[];
       const hasTopPlus = cov>=4 && confl===0 && m.dm && m.dm.np>=40;
       if(h.o25&&h.o25.aff>=4) tips.push({market:'Ov 2.5', tier:hasTopPlus?'TOP+':'TOP', score:h.o25.score+(h.conv||0)+(hasTopPlus?0.5:0)});
