@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0b0d12">
-<title>Match Analyzer Pro – Fase 3</title>
+<title>Match Analyzer Pro – Fase 4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -98,11 +98,11 @@ button{border:none;background:none;cursor:pointer}
 .badge.info{background:var(--blu-bg);color:var(--blu);border-color:rgba(96,165,250,.2)}
 .badge.alt{background:var(--mag-bg);color:var(--mag);border-color:rgba(192,132,252,.2)}
 .badge.neu{background:rgba(255,255,255,.05);color:var(--t2);border-color:rgba(255,255,255,.08)}
-/* Nuovi stili per badge semaforici */
 .badge.dm-green{background:rgba(74,222,128,.15);color:var(--grn);border-color:rgba(74,222,128,.4)}
 .badge.dm-yellow{background:rgba(251,191,36,.1);color:var(--amb);border-color:rgba(251,191,36,.4)}
 .badge.dm-red{background:rgba(248,113,113,.1);color:var(--red);border-color:rgba(248,113,113,.3)}
 .badge.value{background:rgba(192,132,252,.15);color:var(--mag);border-color:rgba(192,132,252,.4)}
+.badge.top-plus{background:rgba(255,215,0,.15);color:#FFD700;border-color:rgba(255,215,0,.5);font-weight:800}
 .boost-indicator{font-size:0.9rem;margin-left:4px;color:var(--grn)}
 .aff{display:flex;align-items:center;gap:3px}
 .aff-d{width:6px;height:6px;border-radius:50%}
@@ -164,7 +164,6 @@ button{border:none;background:none;cursor:pointer}
 .mini.dim{background:var(--s2);color:var(--t2)}
 .btn.ghost{background:transparent;border:1px solid var(--brd);padding:8px 12px;border-radius:8px;color:var(--t2)}
 .btn.danger{color:var(--red);border-color:var(--red)}
-/* Barre di probabilità */
 .prob-bar-container{display:flex;align-items:center;gap:8px;margin:4px 0}
 .prob-bar{flex:1;height:6px;background:var(--s3);border-radius:3px;overflow:hidden}
 .prob-fill{height:100%;background:var(--grn);border-radius:3px}
@@ -508,14 +507,32 @@ button{border:none;background:none;cursor:pointer}
   function scoreAmm(r){const b=[];if(r.amm>=.4)b.push({n:'Amm/p >= 0.40',p:3});else if(r.amm>=.3)b.push({n:'Amm/p 0.30-0.39',p:2.5});else if(r.amm>=.2)b.push({n:'Amm/p 0.20-0.29',p:1.5});else b.push({n:'Amm/p < 0.20',p:0});if(r.falli>=2.5)b.push({n:'Falli >= 2.5',p:2.5});else if(r.falli>=2)b.push({n:'Falli 2.0-2.49',p:2});else if(r.falli>=1.5)b.push({n:'Falli 1.5-1.99',p:1});else b.push({n:'Falli < 1.5',p:0});if(r.rit>=5)b.push({n:'Ritardo >= 5',p:2});else if(r.rit>=3)b.push({n:'Ritardo 3-4',p:1.5});else if(r.rit>=1)b.push({n:'Ritardo 1-2',p:.5});else b.push({n:'Ritardo 0',p:0});if(r.tackle>=2)b.push({n:'Tackle >= 2.0',p:1.5});else if(r.tackle>=1)b.push({n:'Tackle 1.0-1.99',p:.75});else b.push({n:'Tackle < 1.0',p:0});if(r.min>=70)b.push({n:'Minuti >= 70',p:.5});else b.push({n:'Minuti < 70',p:0});const tot=b.reduce((s,x)=>s+x.p,0);return {breakdown:b,total:tot,max:9.5,level:tot>=7?'hot':tot>=5?'warm':'mild'};}
   function scoreGol(r){const b=[];if(r.gol>=.4)b.push({n:'Gol/p >= 0.40',p:3});else if(r.gol>=.25)b.push({n:'Gol/p 0.25-0.39',p:2});else if(r.gol>=.15)b.push({n:'Gol/p 0.15-0.24',p:1});else b.push({n:'Gol/p < 0.15',p:0});if(r.tiriPorta>=2)b.push({n:'TiP >= 2.0',p:2.5});else if(r.tiriPorta>=1.5)b.push({n:'TiP 1.5-1.99',p:1.5});else if(r.tiriPorta>=1)b.push({n:'TiP 1.0-1.49',p:1});else b.push({n:'TiP < 1.0',p:0});if(r.rit>=5)b.push({n:'Ritardo >= 5',p:2});else if(r.rit>=3)b.push({n:'Ritardo 3-4',p:1.5});else if(r.rit>=1)b.push({n:'Ritardo 1-2',p:.5});else b.push({n:'Ritardo 0',p:0});if(r.tiriTot>=3)b.push({n:'TT >= 3.0',p:1.5});else if(r.tiriTot>=2)b.push({n:'TT 2.0-2.99',p:1});else b.push({n:'TT < 2.0',p:0});if(r.min>=70)b.push({n:'Minuti >= 70',p:.5});else b.push({n:'Minuti < 70',p:0});const tot=b.reduce((s,x)=>s+x.p,0);return {breakdown:b,total:tot,max:9.5,level:tot>=7?'hot':tot>=5?'warm':'mild'};}
 
-  // ==================== HUB ADVICE ====================
+  // ==================== HUB ADVICE (MODIFICATA PER TOP+) ====================
   function hubAdvice(h){
     const tips=[];
-    if(h.o25&&h.o25.aff>=4&&h.gzOver&&h.qvForGoals)tips.push({market:'Ov 2.5',tier:'TOP',score:(h.o25?.score||0)+(h.conv||0),reason:'IGBt e MGE forti con conferma GZ over e 1X2 coerente'});
-    if(h.gg&&h.gg.aff>=4&&h.gzOver)tips.push({market:'GG',tier:'TOP',score:(h.gg?.score||0)+(h.conv||0)*0.8,reason:'Segnale offensivo sostenuto da GZ over e indicatori GG'});
-    if(h.ov05&&h.ov05.aff>=4)tips.push({market:'Ov 0.5 PT',tier:'SAFE',score:(h.ov05?.score||0)+(h.gzOver?0.6:0)+(h.qvForGoals?0.3:0),reason:'Linea prudente supportata dall indicatore primo tempo'});
-    if(h.u25&&h.u25.aff>=4&&h.gzUnder)tips.push({market:'U 2.5',tier:'TOP',score:(h.u25?.score||0)+(h.conv||0),reason:'Profilo da under confermato da GZ'});
-    if(h.mg13&&h.mg13.aff>=4)tips.push({market:'MG 1-3',tier:'SMART',score:(h.mg13?.score||0)+(h.gzMid?0.4:0)+(h.qvTight?0.3:0),reason:'Mercato mirato per match controllato o equilibrio'});
+    // Valuta se la partita ha i requisiti per TOP+
+    const hasTopPlusPotential = h.coverage >= 4 && h.conflicts === 0 && h.dm && h.dm.np >= 40;
+    
+    if(h.o25&&h.o25.aff>=4&&h.gzOver&&h.qvForGoals) {
+      const tier = hasTopPlusPotential ? 'TOP+' : 'TOP';
+      tips.push({market:'Ov 2.5', tier, score:(h.o25?.score||0)+(h.conv||0)+(hasTopPlusPotential?0.5:0), reason:'IGBt e MGE forti con conferma GZ over e 1X2 coerente'});
+    }
+    if(h.gg&&h.gg.aff>=4&&h.gzOver) {
+      const tier = hasTopPlusPotential ? 'TOP+' : 'TOP';
+      tips.push({market:'GG', tier, score:(h.gg?.score||0)+(h.conv||0)*0.8+(hasTopPlusPotential?0.4:0), reason:'Segnale offensivo sostenuto da GZ over e indicatori GG'});
+    }
+    if(h.ov05&&h.ov05.aff>=4) {
+      const tier = hasTopPlusPotential ? 'TOP+' : 'SAFE';
+      tips.push({market:'Ov 0.5 PT', tier, score:(h.ov05?.score||0)+(h.gzOver?0.6:0)+(h.qvForGoals?0.3:0)+(hasTopPlusPotential?0.3:0), reason:'Linea prudente supportata dall indicatore primo tempo'});
+    }
+    if(h.u25&&h.u25.aff>=4&&h.gzUnder) {
+      const tier = hasTopPlusPotential ? 'TOP+' : 'TOP';
+      tips.push({market:'U 2.5', tier, score:(h.u25?.score||0)+(h.conv||0)+(hasTopPlusPotential?0.5:0), reason:'Profilo da under confermato da GZ'});
+    }
+    if(h.mg13&&h.mg13.aff>=4) {
+      const tier = hasTopPlusPotential ? 'TOP+' : 'SMART';
+      tips.push({market:'MG 1-3', tier, score:(h.mg13?.score||0)+(h.gzMid?0.4:0)+(h.qvTight?0.3:0)+(hasTopPlusPotential?0.3:0), reason:'Mercato mirato per match controllato o equilibrio'});
+    }
     if(!tips.length){
       if(h.o25&&h.o25.aff>=4) tips.push({market:'Ov 2.5',tier:'WATCH',score:(h.o25?.score||0)+(h.gzOver?0.4:0),reason:'Buon segnale statistico, manca convergenza totale'});
       if(h.gg&&h.gg.aff>=4) tips.push({market:'GG',tier:'WATCH',score:(h.gg?.score||0)+(h.gzOver?0.3:0),reason:'GG interessante ma non completamente confermato'});
@@ -966,7 +983,8 @@ button{border:none;background:none;cursor:pointer}
     else if(ST.market==='hub'){
       const dm = r.dm;
       const dmBadge = dm ? `<span class="badge info" title="NP=${dm.np}">📊 DM: ${dm.np} partite</span>` : '';
-      html=`<div class="mrow" ${rowOpenAttr(i)}><div class="m-ora">${escapeHtml(r.ora||'--:--')}</div><div><div class="m-name">${escapeHtml(r.evento)}</div><div class="m-sub">${r.advice.main?`<span class="badge good">${escapeHtml(r.advice.main.market)}</span>`:''}${r.gzOver?'<span class="badge good">GZ over</span>':''}${r.gzUnder?'<span class="badge warn">GZ under</span>':''}${r.qvForGoals?'<span class="badge alt">1X2 gol</span>':''}${r.qvTight?'<span class="badge info">1X2 draw</span>':''}${dmBadge}<span>${escapeHtml(r.advice.summary)}</span></div></div><div class="m-right">${affBadge(r.aff||3)}<div class="m-ind ${r.conflicts===0?'ind-g':r.conflicts===1?'ind-o':'ind-r'}">${fmt(r.score,1)}</div></div></div>`;
+      const topPlusBadge = r.advice.main?.tier === 'TOP+' ? `<span class="badge top-plus">🏆 TOP+</span>` : '';
+      html=`<div class="mrow" ${rowOpenAttr(i)}><div class="m-ora">${escapeHtml(r.ora||'--:--')}</div><div><div class="m-name">${escapeHtml(r.evento)}</div><div class="m-sub">${r.advice.main?`<span class="badge good">${escapeHtml(r.advice.main.market)}</span>`:''}${r.gzOver?'<span class="badge good">GZ over</span>':''}${r.gzUnder?'<span class="badge warn">GZ under</span>':''}${r.qvForGoals?'<span class="badge alt">1X2 gol</span>':''}${r.qvTight?'<span class="badge info">1X2 draw</span>':''}${dmBadge}${topPlusBadge}<span>${escapeHtml(r.advice.summary)}</span></div></div><div class="m-right">${affBadge(r.aff||3)}<div class="m-ind ${r.conflicts===0?'ind-g':r.conflicts===1?'ind-o':'ind-r'}">${fmt(r.score,1)}</div></div></div>`;
     }
     return html + `<div class="pickbar"><button class="pickbtn" data-addpick="${i}">➕ Aggiungi allo storico</button></div>`;
   }
@@ -1075,6 +1093,7 @@ button{border:none;background:none;cursor:pointer}
       breakdown=`<div class="bk"><div class="bk-t">Consiglio generale</div><div class="note">${escapeHtml(r.advice||'Voce aggregata dalla vista generale.')}</div></div>`;
     } else if(ST.detMarket==='hub'){
       cards=[detailKv('Pronostico top',r.advice.main?.market||'N/D',r.advice.main?'g':'n'),detailKv('Alternativa',r.advice.alt?.market||'N/D'),detailKv('Copertura fonti',`${r.coverage}/5`,r.coverage>=3?'g':'n'),detailKv('Conflitti',r.conflicts,r.conflicts===0?'g':r.conflicts===1?'w':'n'),detailKv('Rischio',r.advice.risk,r.advice.risk==='Basso'?'g':r.advice.risk==='Medio'?'w':'n'),detailKv('GZ / 1X2',`${r.gz?.prob?.label||'N/D'} / ${r.qv?.golSide||'N/D'}`)];
+      if (r.advice.main?.tier === 'TOP+') cards.push(detailKv('🏆 TOP+', 'Convergenza massima, NP≥40, zero conflitti'));
       breakdown=`<div class="bk"><div class="bk-t">Pronostico finale</div><div class="note">${escapeHtml(r.advice.summary)}</div>${(r.advice.tips||[]).slice(0,3).map(x=>`<div class="bk-r"><div class="n">${escapeHtml(x.market)} • ${escapeHtml(x.tier)} • ${escapeHtml(x.reason)}</div><div class="p pos">${fmt(x.score,2)}</div></div>`).join('')}</div>`;
     }
     document.getElementById('detM').innerHTML=`<div class="ov" id="ovLay" aria-modal="true" role="dialog"><div class="det" onclick="event.stopPropagation()"><div class="det-top"><div><div class="det-t">${escapeHtml(title)}</div><div class="det-sub">${escapeHtml(subtitle)}</div></div><button class="det-x" id="closeDetBtn" aria-label="Chiudi dettagli">✕</button></div><div class="abar"><div><div class="abar-lb">Affidabilità</div><div class="abar-dots">${dots(aff,'lg')}</div></div><div class="abar-r"><div class="abar-lb">Score</div><div class="abar-sc">${escapeHtml(score)}</div><div class="abar-pt">${escapeHtml(ST.detMarket.toUpperCase())}</div></div></div><div class="dg">${cards.join('')}</div>${dmSection}${reBars}${breakdown}</div></div>`;
