@@ -4215,7 +4215,7 @@ function clearSlip(){
 function copyTelegram(){
   if(!S.slip.length){ toast('Schedina vuota','warn'); return; }
   const today=new Date().toLocaleDateString('it-IT');
-  let txt=`🏆 *StrategaAi Calcio&Statistiche — Schedina ${today}\n\n`;
+  let txt=`🏆 *StrategaAi* *Calcio&Statistiche* *—* *Schedina* ${today}\n\n`;
   let q=1;
   for(const s of S.slip){
     txt+=`⚽ ${s.evt}\n`;
@@ -4225,10 +4225,11 @@ function copyTelegram(){
   txt+=`Start ⏱️ 14.30\ n`; 
 
   txt+=`🎯 Quota Totale: ${q.toFixed(2)}\n`;
-  txt+=`📈 Stake 2/10\ n`;
-  txt+=`ℹ️ Cod. FASTBET 2Dshks\ n`;
+  txt+=`📈 Stake *2/10*\ n`;
+  txt+=`ℹ️ Cod. FASTBET *2Dshks*\ n`;
 
-  txt+=`StrategaAi 😈`;
+
+  txt+=`*StrategaAi* 😈`;
 
   navigator.clipboard.writeText(txt)
     .then(()=>toast('✓ Copiato per Telegram','ok'))
